@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agente de Productos — E-Commerce UY</title>
+<style>
+  :root {
+    --blue: #1F4E79;
+    --blue-mid: #2E75B6;
+    --blue-light: #D6E4F0;
+    --blue-accent: #E8F4FD;
+    --green: #1e7e34;
+    --green-light: #d4edda;
+    --orange: #e67e22;
+    --orange-light: #fef5e7;
+    --red: #c0392b;
+    --red-light: #fde8e8;
+    --gray: #595959;
+    --gray-light: #f4f6f8;
+    --border: #d0dae4;
+    --text: #1a1a2e;
+    --text-muted: #6b7a8d;
+    --card-bg: #ffffff;
+    --bg: #f0f4f8;
+    --radius: 10px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--blue);
+    color: white;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-logo {
+    width: 32px; height: 32px;
+    background: var(--blue-mid);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px;
+  }
+  .header h1 { font-size: 16px; font-weight: 600; flex: 1; }
+  .header-badge {
+    background: rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 12px;
+  }
+
+  /* MAIN LAYOUT */
+  .main { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  /* CONFIG PANEL */
+  .config-panel {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+  }
+  .config-panel h2 {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+  .config-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  @media (max-width: 600px) { .config-grid { grid-template-columns: 1fr; } }
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .field input, .field select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-size: 14px;
+    color: var(--text);
+    background: #fff;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  .field input:focus, .field select:focus { border-color: var(--blue-mid); }
+  .api-row { display: flex; gap: 8px; align-items: flex-end; }
+  .api-row .field { flex: 1; }
+  .api-status {
+    padding: 9px 14px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    cursor: default;
+  }
+  .api-status.ok { background: var(--green-light); color: var(--green); border-color: #b8ddc0; }
+  .api-status.mock { background: var(--orange-light); color: var(--orange); border-color: #f0d09e; }
+
+  /* SEARCH BUTTON */
+  .search-section { text-align: center; margin-bottom: 2rem; }
+  .btn-search {
+    background: var(--blue);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 48px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    box-shadow: 0 4px 16px rgba(31,78,121,0.25);
+  }
+  .btn-search:hover { background: #163d6b; }
+  .btn-search:active { transform: scale(0.98); }
+  .btn-search:disabled { background: #9bb4cc; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-search svg { margin-right: 8px; vertical-align: -3px; }
+
+  .mock-toggle {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+    cursor: pointer;
+    text-decoration: underline;
+    background: none; border: none;
+  }
+  .mock-toggle:hover { color: var(--blue-mid); }
+
+  /* LOADER */
+  .loader {
+    text-align: center;
+    padding: 3rem;
+    display: none;
+  }
+  .loader.active { display: block; }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--blue-light);
+    border-top-color: var(--blue-mid);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 1rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loader p { color: var(--text-muted); font-size: 14px; }
+
+  /* ERROR */
+  .error-box {
+    background: var(--red-light);
+    border: 1px solid #f0b4b4;
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    color: var(--red);
+    margin-bottom: 1.5rem;
+    display: none;
+    font-size: 14px;
+  }
+  .error-box.active { display: block; }
+
+  /* RESULTS HEADER */
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    display: none;
+  }
+  .results-header.active { display: flex; }
+  .results-header h2 { font-size: 15px; font-weight: 600; color: var(--gray); }
+  .sort-select { padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; background: #fff; color: var(--text); }
+
+  /* PRODUCT CARDS */
+  .results { display: flex; flex-direction: column; gap: 1rem; }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: box-shadow 0.15s;
+  }
+  .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--blue-light);
+    background: var(--blue-accent);
+  }
+  .score-badge {
+    min-width: 52px; height: 52px;
+    border-radius: 10px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-weight: 800;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .score-badge span { font-size: 10px; font-weight: 600; opacity: 0.8; line-height: 1; }
+  .score-9, .score-10 { background: var(--green-light); color: var(--green); }
+  .score-7, .score-8 { background: #d4f0d8; color: #1a6b2a; }
+  .score-5, .score-6 { background: var(--orange-light); color: var(--orange); }
+  .score-1, .score-2, .score-3, .score-4 { background: var(--red-light); color: var(--red); }
+
+  .card-title-block { flex: 1; }
+  .card-title-block h3 { font-size: 17px; font-weight: 700; color: var(--blue); margin-bottom: 4px; }
+  .card-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tag {
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .tag-cat { background: var(--blue-light); color: var(--blue); }
+  .tag-risk-bajo { background: var(--green-light); color: var(--green); }
+  .tag-risk-medio { background: var(--orange-light); color: var(--orange); }
+  .tag-risk-alto { background: var(--red-light); color: var(--red); }
+
+  .card-numbers {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .num-cell {
+    padding: 0.9rem 1rem;
+    text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .num-cell:last-child { border-right: none; }
+  .num-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+  .num-value { font-size: 18px; font-weight: 700; }
+  .num-costo .num-value { color: var(--red); }
+  .num-precio .num-value { color: var(--blue); }
+  .num-margen .num-value { color: var(--green); }
+  .num-proveedor .num-value { font-size: 13px; }
+  .num-proveedor a { color: var(--blue-mid); text-decoration: none; }
+  .num-proveedor a:hover { text-decoration: underline; }
+
+  .card-body { padding: 1.25rem 1.5rem; }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--blue-mid);
+    margin-bottom: 6px;
+    margin-top: 1rem;
+  }
+  .section-label:first-child { margin-top: 0; }
+
+  .analysis-text { font-size: 14px; color: var(--text); line-height: 1.7; }
+  .speech-box {
+    background: var(--gray-light);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--blue-mid);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--text);
+    line-height: 1.65;
+    position: relative;
+  }
+  .btn-copy {
+    position: absolute;
+    top: 8px; right: 8px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+  }
+  .btn-copy:hover { background: var(--blue-light); color: var(--blue); }
+  .btn-copy.copied { background: var(--green-light); color: var(--green); border-color: #b8ddc0; }
+
+  .risk-text { font-size: 13px; color: var(--text-muted); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-muted);
+  }
+  .empty-state svg { opacity: 0.3; margin-bottom: 1rem; }
+  .empty-state p { font-size: 15px; }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 2rem;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-logo">AI</div>
+  <h1>Agente de Búsqueda de Productos</h1>
+  <span class="header-badge" id="mode-badge">Demo</span>
+</header>
+
+<main class="main">
+
+  <!-- CONFIG PANEL -->
+  <div class="config-panel">
+    <h2>Configuración</h2>
+    <div style="margin-bottom: 1rem;">
+      <div class="api-row">
+        <div class="field">
+          <label>URL del Backend (Render)</label>
+          <input type="text" id="api-url" placeholder="https://tu-app.onrender.com" value="">
+        </div>
+        <div class="api-status mock" id="api-status">⚠ Demo mode</div>
+      </div>
+    </div>
+    <div class="config-grid">
+      <div class="field">
+        <label>Categoría</label>
+        <select id="categoria">
+          <option value="">Cualquier categoría</option>
+          <option value="gadgets">Gadgets / Electrónica</option>
+          <option value="belleza">Belleza / Cuidado personal</option>
+          <option value="hogar">Hogar / Cocina</option>
+          <option value="deporte">Deporte / Fitness</option>
+          <option value="mascotas">Mascotas</option>
+          <option value="ninos">Juguetes / Niños</option>
+          <option value="automotor">Automotor / Moto</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Margen mínimo</label>
+        <select id="margen-min">
+          <option value="3">3x (mínimo aceptable)</option>
+          <option value="4">4x (bueno)</option>
+          <option value="5" selected>5x (objetivo)</option>
+          <option value="8">8x (excelente)</option>
+          <option value="10">10x (excepcional)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Cantidad de resultados</label>
+        <select id="cantidad">
+          <option value="3">3 productos</option>
+          <option value="5" selected>5 productos</option>
+          <option value="10">10 productos</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEARCH BUTTON -->
+  <div class="search-section">
+    <button class="btn-search" id="btn-buscar" onclick="buscarProductos()">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+      </svg>
+      BUSCAR PRODUCTOS
+    </button>
+    <br>
+    <button class="mock-toggle" onclick="toggleMock()">
+      <span id="mock-toggle-text">Usar datos demo (sin backend)</span>
+    </button>
+  </div>
+
+  <!-- LOADER -->
+  <div class="loader" id="loader">
+    <div class="spinner"></div>
+    <p id="loader-text">Analizando tendencias y proveedores...</p>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error-box" id="error-box"></div>
+
+  <!-- RESULTS HEADER -->
+  <div class="results-header" id="results-header">
+    <h2 id="results-count"></h2>
+    <select class="sort-select" onchange="sortResults(this.value)">
+      <option value="puntaje">Ordenar por puntaje</option>
+      <option value="margen">Ordenar por margen</option>
+      <option value="costo">Ordenar por costo</option>
+    </select>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div class="empty-state" id="empty-state">
+    <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+    </svg>
+    <p>Configurá los parámetros y presioná <strong>BUSCAR PRODUCTOS</strong></p>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results" id="results"></div>
+
+</main>
+
+<footer>
+  E-Commerce UY — Agente de Productos v1.0 &nbsp;·&nbsp; Backend en Render &nbsp;·&nbsp; Powered by Claude AI
+</footer>
+
+<script>
+  let useMock = true;
+  let currentResults = [];
+
+  const loaderMessages = [
+    "Consultando proveedores en AliExpress...",
+    "Analizando tendencias en Uruguay...",
+    "Calculando márgenes y competencia...",
+    "Generando análisis con Claude AI...",
+    "Evaluando viabilidad logística..."
+  ];
+
+  const MOCK_PRODUCTS = [
+    {
+      nombre: "Depiladora IPL Inalámbrica",
+      categoria: "Belleza / Cuidado personal",
+      puntaje: 9,
+      costo_proveedor: 85,
+      precio_venta_sugerido: 890,
+      margen: 10.5,
+      numero_proveedor: "AE-4892017",
+      link_proveedor: "https://www.aliexpress.com",
+      analisis: "La depiladora IPL tiene una demanda sostenida en Uruguay, especialmente en primavera-verano. Las búsquedas en Google Trends muestran un crecimiento del 34% interanual en la región. El producto se produce masivamente en Shenzhen y los costos de fabricación son muy bajos, lo que permite márgenes excepcionales. La competencia local en Instagram es mínima: solo 2-3 cuentas activas con presupuesto de ads bajo. El video de demostración del proveedor puede reutilizarse directamente como contenido.",
+      speech: "¡Depilación permanente desde tu casa! La Depiladora IPL Pro elimina el vello de forma definitiva en solo 4-6 sesiones. Sin dolor, sin turnos, sin salones. Tecnología usada por dermatólogos ahora disponible en Uruguay 🇺🇾. Envío a todo el país por DAC. Escribinos al WPP 👉",
+      riesgo: "Bajo",
+      riesgo_detalle: "Producto liviano y fácil de enviar. Sin riesgo de rotura. Alta demanda estacional: máxima ventas oct-feb."
+    },
+    {
+      nombre: "Drone Plegable con Cámara 4K",
+      categoria: "Gadgets / Electrónica",
+      puntaje: 8,
+      costo_proveedor: 1050,
+      precio_venta_sugerido: 2350,
+      margen: 2.2,
+      numero_proveedor: "AE-7710342",
+      link_proveedor: "https://www.aliexpress.com",
+      analisis: "Los drones de entrada siguen siendo uno de los productos con mayor tracción en Uruguay. El modelo de drone plegable con cámara 4K tiene una presentación visual excelente para Instagram y Reels — el material de vuelo genera engagement orgánico alto. El precio de venta de $2.350 es competitivo frente a tiendas locales que cobran $3.000-$4.000 por el mismo segmento. Proveedor con más de 10.000 ventas en AliExpress y 4.8 estrellas. El margen de 2.2x es más conservador que otros productos pero el ticket es alto, lo que mejora la ganancia absoluta por venta.",
+      speech: "Drone 4K con cámara estabilizada, plegable y listo para volar 🚁. Grabá videos increíbles desde el aire. Batería de 25 minutos de vuelo, control hasta 500 metros. Disponible en Uruguay con envío DAC. Últimas unidades — consultá disponibilidad vía WPP 👇",
+      riesgo: "Medio",
+      riesgo_detalle: "Producto frágil. Requiere buen embalaje. Puede haber preguntas técnicas post-venta. Revisar regulaciones de vuelo en Uruguay."
+    },
+    {
+      nombre: "Masajeador de Cuero Cabelludo",
+      categoria: "Belleza / Cuidado personal",
+      puntaje: 8,
+      costo_proveedor: 45,
+      precio_venta_sugerido: 390,
+      margen: 8.7,
+      numero_proveedor: "AE-2234891",
+      link_proveedor: "https://www.aliexpress.com",
+      analisis: "El masajeador de cuero cabelludo eléctrico es un producto de bajo costo, alta percepción de valor y facilidad de demostración en video. En TikTok generó millones de vistas en 2024-2025 con contenido mostrando el efecto de relajación. En Uruguay prácticamente no existe competencia directa en redes sociales. El producto pesa menos de 200g, lo que facilita el envío por DAC. Los videos del proveedor chino son directamente reutilizables en Instagram Reels con subtítulos en español.",
+      speech: "El masajeador eléctrico que te relaja en 5 minutos 🧠✨. Estimula el cuero cabelludo, reduce el estrés y mejora la circulación. Recargable, impermeable, 4 cabezales intercambiables. Precio especial esta semana. Enviamos a todo Uruguay 🇺🇾 — WPP para hacer tu pedido 👇",
+      riesgo: "Bajo",
+      riesgo_detalle: "Producto liviano, difícil de romper. No requiere instructivo complejo. Muy fácil de fotografiar y filmar."
+    },
+    {
+      nombre: "Proyector Portátil Mini LED",
+      categoria: "Gadgets / Electrónica",
+      puntaje: 7,
+      costo_proveedor: 650,
+      precio_venta_sugerido: 2800,
+      margen: 4.3,
+      numero_proveedor: "AE-5512774",
+      link_proveedor: "https://www.aliexpress.com",
+      analisis: "Los mini proyectores portátiles tienen una audiencia joven y universitaria muy activa en Uruguay. El producto sirve para gaming, películas en cuarto y presentaciones, lo que amplía la audiencia objetivo. El video de demostración es fácilmente replicable con el material del proveedor. El margen de 4.3x sobre un ticket de $2.800 genera una ganancia bruta de $2.150 por unidad vendida. Vale la pena testear con 3-5 unidades iniciales.",
+      speech: "Llevá el cine a donde quieras 🎬. Mini proyector portátil con imagen hasta 120 pulgadas, conexión WiFi y Bluetooth, batería integrada. Perfecto para tu cuarto, el jardín o el campo. Enviamos a todo Uruguay — consultá stock vía WPP 👉",
+      riesgo: "Medio",
+      riesgo_detalle: "Requiere embalaje cuidadoso. El comprador puede tener expectativas altas por el precio. Asegurarse que el proveedor incluya manual en español."
+    },
+    {
+      nombre: "Cortadora de Pelo Profesional Inalámbrica",
+      categoria: "Belleza / Cuidado personal",
+      puntaje: 7,
+      costo_proveedor: 120,
+      precio_venta_sugerido: 650,
+      margen: 5.4,
+      numero_proveedor: "AE-3398012",
+      link_proveedor: "https://www.aliexpress.com",
+      analisis: "Las cortadoras de pelo profesionales inalámbricas tienen demanda constante en Uruguay, especialmente entre hombres que prefieren cortarse el cabello en casa. El producto tiene un contenido visual fácil de generar (demo en video) y una audiencia masiva. El margen de 5.4x es sólido. El producto existe en muchos proveedores chinos con alta disponibilidad, lo que reduce el riesgo de quiebre de stock.",
+      speech: "Cortate el pelo como un profesional desde casa ✂️. Cortadora inalámbrica con 4 peines guía, carga USB en 2hs y autonomía de 60 minutos. Sin ruido, sin cables, sin complicaciones. Especial para barba y cabello. Envíos a todo Uruguay — WPP para pedir 👇",
+      riesgo: "Bajo",
+      riesgo_detalle: "Producto con demanda estable todo el año. Fácil de enviar. Sin necesidad de instrucciones complejas."
+    }
+  ];
+
+  function toggleMock() {
+    const urlInput = document.getElementById('api-url').value.trim();
+    useMock = !useMock || !urlInput;
+    updateModeUI();
+  }
+
+  function updateModeUI() {
+    const urlInput = document.getElementById('api-url').value.trim();
+    const badge = document.getElementById('mode-badge');
+    const status = document.getElementById('api-status');
+    const toggleText = document.getElementById('mock-toggle-text');
+
+    if (!useMock && urlInput) {
+      badge.textContent = 'Live';
+      badge.style.background = 'rgba(46,196,100,0.25)';
+      status.textContent = '✓ Backend conectado';
+      status.className = 'api-status ok';
+      toggleText.textContent = 'Usar datos demo (sin backend)';
+    } else {
+      useMock = true;
+      badge.textContent = 'Demo';
+      badge.style.background = 'rgba(255,255,255,0.15)';
+      status.textContent = '⚠ Demo mode';
+      status.className = 'api-status mock';
+      toggleText.textContent = urlInput ? 'Conectar al backend →' : 'Ingresá la URL del backend para conectar';
+    }
+  }
+
+  document.getElementById('api-url').addEventListener('input', function() {
+    if (this.value.trim()) { useMock = false; }
+    else { useMock = true; }
+    updateModeUI();
+  });
+
+  async function buscarProductos() {
+    const btn = document.getElementById('btn-buscar');
+    const loader = document.getElementById('loader');
+    const errorBox = document.getElementById('error-box');
+    const resultsEl = document.getElementById('results');
+    const emptyState = document.getElementById('empty-state');
+    const resultsHeader = document.getElementById('results-header');
+
+    btn.disabled = true;
+    loader.classList.add('active');
+    errorBox.classList.remove('active');
+    resultsEl.innerHTML = '';
+    emptyState.style.display = 'none';
+    resultsHeader.classList.remove('active');
+
+    let msgIdx = 0;
+    const msgInterval = setInterval(() => {
+      document.getElementById('loader-text').textContent = loaderMessages[msgIdx % loaderMessages.length];
+      msgIdx++;
+    }, 1400);
+
+    try {
+      let productos;
+
+      if (useMock) {
+        await new Promise(r => setTimeout(r, 3200));
+        const cantidad = parseInt(document.getElementById('cantidad').value);
+        const margenMin = parseFloat(document.getElementById('margen-min').value);
+        const cat = document.getElementById('categoria').value;
+
+        productos = MOCK_PRODUCTS
+          .filter(p => !cat || p.categoria.toLowerCase().includes(cat.toLowerCase()))
+          .filter(p => p.margen >= margenMin)
+          .slice(0, cantidad);
+
+        if (productos.length === 0) productos = MOCK_PRODUCTS.slice(0, cantidad);
+      } else {
+        const apiUrl = document.getElementById('api-url').value.trim().replace(/\/$/, '');
+        const response = await fetch(`${apiUrl}/api/agent/buscar-productos`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            categoria: document.getElementById('categoria').value,
+            margen_minimo: parseFloat(document.getElementById('margen-min').value),
+            cantidad: parseInt(document.getElementById('cantidad').value)
+          })
+        });
+        if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+        const data = await response.json();
+        productos = data.productos || data;
+      }
+
+      currentResults = productos;
+      renderResults(productos);
+
+    } catch (err) {
+      errorBox.textContent = `Error al conectar con el backend: ${err.message}. Activá el modo Demo para ver productos de ejemplo.`;
+      errorBox.classList.add('active');
+      emptyState.style.display = 'block';
+    } finally {
+      clearInterval(msgInterval);
+      loader.classList.remove('active');
+      btn.disabled = false;
+    }
+  }
+
+  function sortResults(by) {
+    const sorted = [...currentResults].sort((a, b) => {
+      if (by === 'puntaje') return b.puntaje - a.puntaje;
+      if (by === 'margen') return b.margen - a.margen;
+      if (by === 'costo') return a.costo_proveedor - b.costo_proveedor;
+      return 0;
+    });
+    renderResults(sorted);
+  }
+
+  function renderResults(productos) {
+    const resultsEl = document.getElementById('results');
+    const resultsHeader = document.getElementById('results-header');
+    const emptyState = document.getElementById('empty-state');
+
+    resultsEl.innerHTML = '';
+
+    if (!productos || productos.length === 0) {
+      emptyState.style.display = 'block';
+      resultsHeader.classList.remove('active');
+      return;
+    }
+
+    emptyState.style.display = 'none';
+    resultsHeader.classList.add('active');
+    document.getElementById('results-count').textContent =
+      `${productos.length} producto${productos.length !== 1 ? 's' : ''} encontrado${productos.length !== 1 ? 's' : ''}`;
+
+    productos.forEach((p, i) => {
+      const margenStr = p.margen ? `${p.margen.toFixed(1)}x` : '—';
+      const costoStr = p.costo_proveedor ? `$${p.costo_proveedor.toLocaleString('es-UY')}` : '—';
+      const precioStr = p.precio_venta_sugerido ? `$${p.precio_venta_sugerido.toLocaleString('es-UY')}` : '—';
+      const scoreClass = `score-${Math.min(10, Math.max(1, Math.round(p.puntaje)))}`;
+      const riskClass = p.riesgo === 'Bajo' ? 'tag-risk-bajo' : p.riesgo === 'Alto' ? 'tag-risk-alto' : 'tag-risk-medio';
+      const cardId = `card-${i}`;
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.id = cardId;
+      card.innerHTML = `
+        <div class="card-header">
+          <div class="score-badge ${scoreClass}">
+            ${p.puntaje}<span>/10</span>
+          </div>
+          <div class="card-title-block">
+            <h3>${escHTML(p.nombre)}</h3>
+            <div class="card-meta">
+              <span class="tag tag-cat">${escHTML(p.categoria || '')}</span>
+              <span class="tag ${riskClass}">Riesgo ${escHTML(p.riesgo || 'medio')}</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-numbers">
+          <div class="num-cell num-costo">
+            <div class="num-label">Costo proveedor</div>
+            <div class="num-value">${costoStr}</div>
+          </div>
+          <div class="num-cell num-precio">
+            <div class="num-label">Precio de venta</div>
+            <div class="num-value">${precioStr}</div>
+          </div>
+          <div class="num-cell num-margen">
+            <div class="num-label">Margen</div>
+            <div class="num-value">${margenStr}</div>
+          </div>
+          <div class="num-cell num-proveedor">
+            <div class="num-label">N° Proveedor</div>
+            <div class="num-value">
+              ${p.link_proveedor
+                ? `<a href="${escHTML(p.link_proveedor)}" target="_blank">${escHTML(p.numero_proveedor || 'Ver')}</a>`
+                : escHTML(p.numero_proveedor || '—')}
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="section-label">Análisis del agente</div>
+          <p class="analysis-text">${escHTML(p.analisis || '')}</p>
+          <div class="section-label">Speech de venta</div>
+          <div class="speech-box" id="speech-${i}">
+            ${escHTML(p.speech || '')}
+            <button class="btn-copy" onclick="copySpeech(${i}, this)">Copiar</button>
+          </div>
+          ${p.riesgo_detalle ? `
+          <div class="section-label">Consideraciones</div>
+          <p class="risk-text">${escHTML(p.riesgo_detalle)}</p>
+          ` : ''}
+        </div>
+      `;
+      resultsEl.appendChild(card);
+    });
+  }
+
+  function copySpeech(idx, btn) {
+    const box = document.getElementById(`speech-${idx}`);
+    const text = box.childNodes[0].textContent.trim();
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '¡Copiado!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copiar';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  function escHTML(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+</script>
+</body>
+</html>
