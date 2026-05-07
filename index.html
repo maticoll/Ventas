@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpheraBeauty</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,700&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-from:  #FDF6F1;
+      --bg-to:    #F8EAF0;
+      --rose:     #C4607A;
+      --rose-mid: #E8A4B8;
+      --text:     #2D1B25;
+      --muted:    #B08A96;
+      --border:   #EDD8DE;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(150deg, var(--bg-from) 0%, #FBF0F4 50%, var(--bg-to) 100%);
+      background-attachment: fixed;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    /* Soft petal shapes */
+    .petal {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .petal-1 {
+      width: 600px; height: 600px;
+      top: -200px; right: -150px;
+      background: radial-gradient(circle, rgba(232,164,184,0.18) 0%, transparent 70%);
+    }
+
+    .petal-2 {
+      width: 400px; height: 400px;
+      bottom: -100px; left: -80px;
+      background: radial-gradient(circle, rgba(196,96,122,0.1) 0%, transparent 70%);
+    }
+
+    .page {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--rose);
+      margin-bottom: 1.25rem;
+      animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .wordmark {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3rem, 10vw, 6.5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: var(--text);
+      animation: fadeUp 0.7s 0.08s cubic-bezier(0.16, 1, 0.3, 1) both;
+      position: relative;
+    }
+
+    .wordmark em {
+      font-style: italic;
+      color: var(--rose);
+    }
+
+    /* Decorative underline */
+    .wordmark::after {
+      content: '';
+      display: block;
+      width: 60%;
+      height: 2px;
+      margin: 0.5rem auto 0;
+      background: linear-gradient(90deg, transparent, var(--rose-mid), transparent);
+      animation: fadeUp 0.7s 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .tagline {
+      font-size: 0.9rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      margin-top: 1.25rem;
+      font-weight: 400;
+      animation: fadeUp 0.7s 0.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .enter-btn {
+      margin-top: 2.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.85rem 2.25rem;
+      background: var(--rose);
+      color: #FFFFFF;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 100px;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: fadeUp 0.7s 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+      box-shadow: 0 4px 20px rgba(196,96,122,0.25);
+    }
+
+    .enter-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(196,96,122,0.35);
+    }
+
+    .version {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.75rem;
+      font-size: 0.68rem;
+      color: var(--border);
+      letter-spacing: 0.1em;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="petal petal-1"></div>
+  <div class="petal petal-2"></div>
+  <div class="page">
+    <div class="eyebrow">Marketplace · Uruguay</div>
+    <div class="wordmark">Ophera<em>Beauty</em></div>
+    <p class="tagline">Herramientas para crecer tu negocio</p>
+    <a href="dashboard.html" class="enter-btn">
+      Entrar al dashboard
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M3 8h10M9 4l4 4-4 4"/>
+      </svg>
+    </a>
+  </div>
+  <span class="version">v0.1.0</span>
+</body>
+</html>

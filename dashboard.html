@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — OpheraBeauty</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Nunito:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Reset & Variables ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #FDF6F1;
+      --sidebar-bg:   #FFFFFF;
+      --surface:      #FFF8F5;
+      --surface-2:    #FAF0F4;
+      --card:         #FFFFFF;
+      --card-hover:   #FFF4F6;
+      --border:       #EDD8DE;
+      --border-light: #F5E5E8;
+      --gold:         #C4607A;
+      --gold-dim:     rgba(196,96,122,0.08);
+      --gold-glow:    rgba(196,96,122,0.22);
+      --orange:       #E8A4B8;
+      --text:         #2D1B25;
+      --text-dim:     #7A5565;
+      --muted:        #B08A96;
+      --success:      #5A9E7A;
+      --success-bg:   rgba(90,158,122,0.1);
+      --warn:         #C9956A;
+      --warn-bg:      rgba(201,149,106,0.1);
+      --danger:       #C44A62;
+      --danger-bg:    rgba(196,74,98,0.1);
+      --sidebar-w:    240px;
+      --header-h:     60px;
+    }
+
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Nunito', sans-serif; }
+
+    /* Subtle gradient background */
+    body {
+      background: linear-gradient(150deg, #FDF6F1 0%, #FBF0F4 50%, #F8EAF0 100%);
+      background-attachment: fixed;
+    }
+
+    /* ─── Layout Shell ──────────────────────────────────────────── */
+    .shell { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ─── Sidebar ───────────────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-width: var(--sidebar-w);
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      box-shadow: 2px 0 16px rgba(196,96,122,0.06);
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Gold accent line */
+    .sidebar::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 2px; height: 100%;
+      background: linear-gradient(to bottom, transparent, #E8A4B8 20%, #C4607A 50%, #E8A4B8 80%, transparent);
+      opacity: 0.5;
+    }
+
+    .sidebar-logo {
+      padding: 1.5rem 1.25rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .logo-mark {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: var(--text);
+    }
+
+    .logo-mark em { font-style: italic; color: var(--gold); }
+
+    .logo-sub {
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-top: 0.1rem;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 1rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      overflow-y: auto;
+    }
+
+    .nav-section-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      padding: 0.75rem 0.75rem 0.35rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      transition: background 0.15s, color 0.15s;
+      border: 1px solid transparent;
+      user-select: none;
+    }
+
+    .nav-item:hover { background: var(--surface); color: var(--text); }
+
+    .nav-item.active {
+      background: var(--gold-dim);
+      color: var(--gold);
+      border-color: rgba(196,96,122,0.18);
+    }
+
+    .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
+    .nav-item.active svg { opacity: 1; }
+
+    .nav-divider { height: 1px; background: var(--border); margin: 0.5rem 0.75rem; }
+
+    .sidebar-footer {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .avatar {
+      width: 30px; height: 30px;
+      background: linear-gradient(135deg, #E8A4B8, #C4607A);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 0.72rem;
+      color: #FFFFFF;
+      flex-shrink: 0;
+    }
+
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-size: 0.8rem; font-weight: 600; truncate: ellipsis; white-space: nowrap; overflow: hidden; }
+    .user-role { font-size: 0.7rem; color: var(--muted); }
+
+    .logout-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); padding: 4px;
+      border-radius: 4px; transition: color 0.15s;
+      display: flex; align-items: center;
+    }
+    .logout-btn:hover { color: var(--text); }
+
+    /* ─── Main Content ──────────────────────────────────────────── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Top header */
+    .topbar {
+      height: var(--header-h);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 1.75rem;
+      gap: 1rem;
+      flex-shrink: 0;
+      background: var(--sidebar-bg);
+    }
+
+    .topbar-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .topbar-breadcrumb {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .topbar-breadcrumb span { color: var(--text-dim); }
+
+    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 0.75rem; }
+
+    .status-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 6px var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; } 50% { opacity: 0.5; }
+    }
+
+    .status-text { font-size: 0.75rem; color: var(--text-dim); }
+
+    /* Content area */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    /* Sections */
+    .section { display: none; height: 100%; }
+    .section.active { display: flex; flex-direction: column; }
+
+    /* ─── Placeholder sections ──────────────────────────────────── */
+    .placeholder-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 1rem;
+      color: var(--muted);
+    }
+
+    .placeholder-area svg { width: 48px; height: 48px; opacity: 0.3; }
+    .placeholder-area h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--text-dim); }
+    .placeholder-area p { font-size: 0.85rem; color: var(--muted); text-align: center; max-width: 300px; }
+
+    .badge-soon {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.25rem 0.65rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border-light);
+      color: var(--text-dim);
+    }
+
+    /* ─── Dashboard section ─────────────────────────────────────── */
+    .section-pad { padding: 1.75rem; }
+
+    .section-header { margin-bottom: 1.5rem; }
+    .section-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+    .section-header p { font-size: 0.85rem; color: var(--text-dim); margin-top: 0.25rem; }
+
+    /* ─── Buscador section (iframe) ─────────────────────────────── */
+    .iframe-wrap {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .iframe-wrap iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* ─── CALCULADORA ───────────────────────────────────────────── */
+    .calc-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .calc-layout { grid-template-columns: 1fr; }
+    }
+
+    .card-block {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+    }
+
+    .card-block h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-block h3::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Input fields */
+    .input-group { margin-bottom: 1rem; }
+
+    .input-group label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      margin-bottom: 0.4rem;
+    }
+
+    .input-wrap {
+      display: flex;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      transition: border-color 0.2s;
+    }
+
+    .input-wrap:focus-within { border-color: var(--gold); }
+
+    .input-prefix, .input-suffix {
+      padding: 0 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--muted);
+      background: var(--surface-2);
+      height: 100%;
+      display: flex;
+      align-items: center;
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .input-suffix { border-right: none; border-left: 1px solid var(--border); }
+
+    .input-wrap input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      padding: 0.65rem 0.75rem;
+    }
+
+    .input-wrap input::placeholder { color: var(--muted); }
+
+    .input-hint {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 0.3rem;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    /* Results card */
+    .result-big {
+      margin-bottom: 1.25rem;
+    }
+
+    .result-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .result-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2.4rem;
+      font-weight: 600;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      transition: color 0.3s;
+    }
+
+    .result-value.positive { color: var(--success); }
+    .result-value.neutral  { color: var(--warn); }
+    .result-value.negative { color: var(--danger); }
+
+    .result-sub {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-top: 0.25rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .metric-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 0.85rem;
+    }
+
+    .metric-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .metric-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.25rem;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    .metric-val.ok   { color: var(--success); }
+    .metric-val.warn { color: var(--warn); }
+    .metric-val.bad  { color: var(--danger); }
+
+    /* Margin gauge */
+    .gauge-wrap { margin-top: 1.25rem; }
+
+    .gauge-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .gauge-bar {
+      height: 6px;
+      background: var(--surface-2);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .gauge-fill {
+      height: 100%;
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s;
+    }
+
+    .gauge-legend {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.5rem;
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
+
+    .gauge-legend-item {
+      display: flex; align-items: center; gap: 0.3rem;
+    }
+
+    .gauge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+    }
+
+    /* Reset button */
+    .reset-btn {
+      margin-top: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.8rem;
+      padding: 0.55rem 1rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+
+    .reset-btn:hover { border-color: var(--border-light); color: var(--text); background: var(--surface); }
+
+    /* Scenario quick fills */
+    .scenarios {
+      margin-top: 1.5rem;
+    }
+
+    .scenarios h3 {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .scenario-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .scenario-chip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 0.85rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .scenario-chip:hover { border-color: var(--border-light); color: var(--text); background: var(--surface-2); }
+
+    .scenario-chip span:last-child {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* ─── AGENTE / CHATBOT ──────────────────────────────────────── */
+    .chat-layout {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .chat-history {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .chat-message {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      animation: msgIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg-avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .msg-avatar.bot  { background: var(--gold); color: #FFFFFF; }
+    .msg-avatar.user { background: var(--surface-2); color: var(--text-dim); border: 1px solid var(--border-light); }
+
+    .msg-bubble {
+      max-width: 680px;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      border: 1px solid var(--border);
+    }
+
+    .chat-message.bot  .msg-bubble { background: var(--card); }
+    .chat-message.user .msg-bubble { background: var(--surface-2); }
+
+    .msg-bubble p { margin: 0; }
+    .msg-bubble p + p { margin-top: 0.5rem; }
+    .msg-bubble strong { color: var(--gold); font-weight: 600; }
+    .msg-bubble em { color: var(--text-dim); }
+
+    .chat-message.user { flex-direction: row-reverse; }
+    .chat-message.user .msg-bubble { text-align: right; }
+
+    .msg-time {
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-top: 0.35rem;
+    }
+
+    /* Typing indicator */
+    .typing-indicator {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .typing-dots {
+      display: flex;
+      gap: 4px;
+      padding: 0.75rem 1rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+
+    .typing-dots span {
+      width: 6px; height: 6px;
+      background: var(--muted);
+      border-radius: 50%;
+      animation: typingBounce 1.4s infinite;
+    }
+
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingBounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-4px); opacity: 1; }
+    }
+
+    .chat-input-bar {
+      border-top: 1px solid var(--border);
+      padding: 1rem 1.75rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-end;
+      background: var(--sidebar-bg);
+    }
+
+    .chat-input-wrap {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0.6rem 1rem;
+      gap: 0.5rem;
+      transition: border-color 0.2s;
+    }
+
+    .chat-input-wrap:focus-within { border-color: var(--gold); }
+
+    .chat-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.9rem;
+      resize: none;
+      max-height: 120px;
+      overflow-y: auto;
+      line-height: 1.5;
+    }
+
+    .chat-input::placeholder { color: var(--muted); }
+
+    .send-btn {
+      width: 38px; height: 38px;
+      background: var(--gold);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+      flex-shrink: 0;
+    }
+
+    .send-btn:hover { transform: scale(1.05); box-shadow: 0 4px 16px var(--gold-glow); }
+    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .send-btn svg { width: 16px; height: 16px; color: #FFFFFF; }
+
+    .chat-hint {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-align: center;
+      padding-bottom: 0.25rem;
+    }
+
+    /* Chat persona badge */
+    .persona-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.85rem 1.75rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--sidebar-bg);
+    }
+
+    .persona-icon {
+      width: 36px; height: 36px;
+      background: var(--gold);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #FFFFFF;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    .persona-info { flex: 1; }
+    .persona-name { font-size: 0.85rem; font-weight: 600; }
+    .persona-role { font-size: 0.73rem; color: var(--text-dim); }
+
+    .persona-status {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      color: var(--success);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 2px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div>
+        <div class="logo-mark">Ophera<em>Beauty</em></div>
+        <div class="logo-sub">Marketplace UY</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Principal</span>
+
+      <div class="nav-item active" data-section="dashboard">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/>
+          <rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/>
+        </svg>
+        Dashboard
+      </div>
+
+      <div class="nav-item" data-section="buscador">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="6.5" cy="6.5" r="4.5"/><path d="M10 10l3 3"/>
+        </svg>
+        Buscador de productos
+      </div>
+
+      <div class="nav-divider"></div>
+      <span class="nav-section-label">Herramientas</span>
+
+      <div class="nav-item" data-section="calculadora">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="1" width="12" height="14" rx="1"/>
+          <path d="M5 5h6M5 8h2M9 8h2M5 11h2M9 11h2"/>
+        </svg>
+        Calculadora
+      </div>
+
+      <div class="nav-item" data-section="contenido">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M2 4h12M2 8h8M2 12h5"/><path d="M11 11l1.5-1.5 2 2-1.5 1.5z"/>
+        </svg>
+        Creador de contenido
+      </div>
+
+      <div class="nav-item" data-section="campana">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 5l10 3-10 3V5z"/><path d="M13 8h2"/>
+        </svg>
+        Creador de campaña
+      </div>
+
+      <div class="nav-divider"></div>
+      <span class="nav-section-label">IA</span>
+
+      <div class="nav-item" data-section="agente">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="8" cy="6" r="3"/><path d="M8 9v2M5 14a3 3 0 016 0"/>
+          <path d="M1 8a7 7 0 0114 0" stroke-dasharray="2 2"/>
+        </svg>
+        Agente
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="avatar">OB</div>
+      <div class="user-info">
+        <div class="user-name">Admin</div>
+        <div class="user-role">CEO · Propietario</div>
+      </div>
+      <button class="logout-btn" onclick="window.location.href='login.html'" title="Cerrar sesión">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M6 3H2v10h4M11 5l3 3-3 3M7 8h7"/>
+        </svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══════════════ MAIN ═══════════════ -->
+  <main class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      </div>
+      <div class="topbar-right">
+        <div class="status-dot"></div>
+        <span class="status-text" id="backendStatus">Conectando…</span>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- ─── Dashboard ──────────────────────────────────────────── -->
+      <div class="section active section-pad" id="section-dashboard">
+        <div class="section-header">
+          <h2>Bienvenido a OpheraBeauty 👋</h2>
+          <p>Tu panel de control para e-commerce en Uruguay.</p>
+        </div>
+        <div class="placeholder-area" style="flex:1;min-height:300px;">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="4" y="4" width="40" height="40" rx="3"/>
+            <path d="M4 16h40M16 16v28"/>
+          </svg>
+          <h3>Dashboard en construcción</h3>
+          <p>Pronto vas a ver métricas, ventas y alertas aquí.</p>
+          <span class="badge-soon">Próximamente</span>
+        </div>
+      </div>
+
+      <!-- ─── Buscador de Productos ──────────────────────────────── -->
+      <div class="section" id="section-buscador">
+        <div class="iframe-wrap">
+          <iframe src="agente_productos.html" id="buscadorFrame" title="Buscador de Productos"></iframe>
+        </div>
+      </div>
+
+      <!-- ─── Calculadora de Ganancias ──────────────────────────── -->
+      <div class="section section-pad" id="section-calculadora" style="overflow-y:auto;">
+        <div class="section-header">
+          <h2>Calculadora de ganancias</h2>
+          <p>Calculá tu margen real incluyendo costos de importación, envío y comisiones.</p>
+        </div>
+
+        <div class="calc-layout">
+
+          <!-- Panel de inputs -->
+          <div>
+            <div class="card-block">
+              <h3>Costos</h3>
+
+              <div class="input-group">
+                <label>Precio de compra (proveedor)</label>
+                <div class="input-wrap">
+                  <div class="input-prefix">USD</div>
+                  <input type="number" id="c_compra" placeholder="0.00" step="0.01" min="0" />
+                </div>
+                <div class="input-hint">Precio en AliExpress u otro proveedor</div>
+              </div>
+
+              <div class="input-group">
+                <label>Costo de envío a Uruguay</label>
+                <div class="input-wrap">
+                  <div class="input-prefix">USD</div>
+                  <input type="number" id="c_envio" placeholder="0.00" step="0.01" min="0" />
+                </div>
+                <div class="input-hint">Flete desde origen + aduana estimada</div>
+              </div>
+
+              <div class="input-group">
+                <label>Otros costos adicionales</label>
+                <div class="input-wrap">
+                  <div class="input-prefix">USD</div>
+                  <input type="number" id="c_otros" placeholder="0.00" step="0.01" min="0" />
+                </div>
+                <div class="input-hint">Embalaje, etiquetas, etc.</div>
+              </div>
+
+              <div class="input-row">
+                <div class="input-group" style="margin-bottom:0;">
+                  <label>Tipo de cambio</label>
+                  <div class="input-wrap">
+                    <input type="number" id="c_tc" placeholder="43.5" step="0.1" min="1" />
+                    <div class="input-suffix">UYU/USD</div>
+                  </div>
+                </div>
+                <div class="input-group" style="margin-bottom:0;">
+                  <label>Comisión plataforma</label>
+                  <div class="input-wrap">
+                    <input type="number" id="c_comision" placeholder="0" step="0.5" min="0" max="100" />
+                    <div class="input-suffix">%</div>
+                  </div>
+                </div>
+              </div>
+              <div class="input-hint" style="margin-top:0.4rem;">MercadoLibre cobra ~10%. Venta directa: 0%</div>
+            </div>
+
+            <div class="card-block" style="margin-top:1.25rem;">
+              <h3>Precio de venta</h3>
+              <div class="input-group">
+                <label>Precio de venta al público (UYU)</label>
+                <div class="input-wrap">
+                  <div class="input-prefix">$</div>
+                  <input type="number" id="c_venta" placeholder="0" step="10" min="0" />
+                  <div class="input-suffix">UYU</div>
+                </div>
+              </div>
+              <div class="input-group" style="margin-bottom:0;">
+                <label>Cantidad de unidades a vender</label>
+                <div class="input-wrap">
+                  <input type="number" id="c_cantidad" placeholder="1" step="1" min="1" value="1" />
+                  <div class="input-suffix">unidades</div>
+                </div>
+                <div class="input-hint">Proyectá tu ganancia total para X ventas</div>
+              </div>
+            </div>
+
+            <!-- Scenarios -->
+            <div class="scenarios">
+              <h3>Escenarios rápidos</h3>
+              <div class="scenario-list">
+                <div class="scenario-chip" onclick="fillScenario(18, 5, 1, 43.5, 0, 1290)">
+                  <span>Gadget electrónico (AliExpress)</span>
+                  <span>$18 USD → $1.290</span>
+                </div>
+                <div class="scenario-chip" onclick="fillScenario(8, 4, 0.5, 43.5, 0, 690)">
+                  <span>Accesorio de moda</span>
+                  <span>$8 USD → $690</span>
+                </div>
+                <div class="scenario-chip" onclick="fillScenario(25, 6, 2, 43.5, 10, 1990)">
+                  <span>Producto en MercadoLibre</span>
+                  <span>$25 USD → $1.990</span>
+                </div>
+                <div class="scenario-chip" onclick="fillScenario(3.5, 3.5, 0, 43.5, 0, 390)">
+                  <span>Producto bajo costo</span>
+                  <span>$3.5 USD → $390</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel de resultados -->
+          <div>
+            <div class="card-block">
+              <h3>Resultado</h3>
+
+              <div class="result-big">
+                <div class="result-label">Ganancia neta</div>
+                <div class="result-value neutral" id="r_ganancia_uyu">—</div>
+                <div class="result-sub" id="r_ganancia_usd">Ingresá los valores para calcular</div>
+              </div>
+
+              <div class="gauge-wrap">
+                <div class="gauge-header">
+                  <span>Margen de ganancia</span>
+                  <span id="r_margen_pct">—</span>
+                </div>
+                <div class="gauge-bar">
+                  <div class="gauge-fill" id="gaugeBar"></div>
+                </div>
+                <div class="gauge-legend">
+                  <div class="gauge-legend-item"><div class="gauge-dot" style="background:var(--danger)"></div> &lt;20% bajo</div>
+                  <div class="gauge-legend-item"><div class="gauge-dot" style="background:var(--warn)"></div> 20–40% ok</div>
+                  <div class="gauge-legend-item"><div class="gauge-dot" style="background:var(--success)"></div> &gt;40% bien</div>
+                </div>
+              </div>
+
+              <div class="metrics-grid">
+                <div class="metric-box">
+                  <div class="metric-label">ROI</div>
+                  <div class="metric-val" id="r_roi">—</div>
+                </div>
+                <div class="metric-box">
+                  <div class="metric-label">Multiplicador</div>
+                  <div class="metric-val" id="r_multi">—</div>
+                </div>
+                <div class="metric-box">
+                  <div class="metric-label">Costo total</div>
+                  <div class="metric-val" id="r_costo_uyu">—</div>
+                </div>
+                <div class="metric-box">
+                  <div class="metric-label">Comisión</div>
+                  <div class="metric-val" id="r_comision_uyu">—</div>
+                </div>
+              </div>
+
+              <button class="reset-btn" onclick="resetCalc()">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M2 8a6 6 0 1012 0A6 6 0 002 8zM5 5l1.5 1.5M8 4v1"/>
+                </svg>
+                Reiniciar calculadora
+              </button>
+            </div>
+
+            <!-- Proyección por cantidad -->
+            <div class="card-block" style="margin-top:1.25rem;" id="proyeccionCard">
+              <h3>Proyección por cantidad</h3>
+              <div class="result-big" style="margin-bottom:0.75rem;">
+                <div class="result-label">Ganancia bruta total</div>
+                <div class="result-value neutral" id="r_total_uyu" style="font-size:2rem;">—</div>
+                <div class="result-sub" id="r_total_usd">Ajustá la cantidad de unidades</div>
+              </div>
+              <div class="metrics-grid" style="margin-top:0.75rem;">
+                <div class="metric-box">
+                  <div class="metric-label">Unidades</div>
+                  <div class="metric-val" id="r_cant" style="color:var(--text);">—</div>
+                </div>
+                <div class="metric-box">
+                  <div class="metric-label">Inversión total</div>
+                  <div class="metric-val" id="r_inversion_total" style="color:var(--text);">—</div>
+                </div>
+                <div class="metric-box">
+                  <div class="metric-label">Ingresos totales</div>
+                  <div class="metric-val" id="r_ingresos_total">—</div>
+                </div>
+                <div class="metric-box">
+                  <div class="metric-label">Comisiones totales</div>
+                  <div class="metric-val" id="r_comisiones_total" style="color:var(--danger);">—</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Desglose detallado -->
+            <div class="card-block" style="margin-top:1.25rem;">
+              <h3>Desglose</h3>
+              <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+                <tbody id="desglose">
+                  <tr><td colspan="2" style="color:var(--muted);padding:0.5rem 0;">Ingresá los valores para ver el desglose.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div><!-- /.calc-layout -->
+      </div>
+
+      <!-- ─── Contenido ──────────────────────────────────────────── -->
+      <div class="section" id="section-contenido">
+        <div class="placeholder-area" style="height:100%;">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M8 8h32M8 16h20M8 24h12M28 22l10 4-10 4v-8z"/>
+          </svg>
+          <h3>Creador de contenido</h3>
+          <p>Generá copys, captions y textos para redes sociales directamente desde acá.</p>
+          <span class="badge-soon">Próximamente</span>
+        </div>
+      </div>
+
+      <!-- ─── Campaña ────────────────────────────────────────────── -->
+      <div class="section" id="section-campana">
+        <div class="placeholder-area" style="height:100%;">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M8 18l32 10-32 10V18z"/><path d="M40 23h6"/>
+          </svg>
+          <h3>Creador de campaña</h3>
+          <p>Planificá y armá campañas de marketing desde cero con ayuda de IA.</p>
+          <span class="badge-soon">Próximamente</span>
+        </div>
+      </div>
+
+      <!-- ─── Agente ─────────────────────────────────────────────── -->
+      <div class="section" id="section-agente" style="height:100%;">
+        <div class="chat-layout">
+          <!-- Persona header -->
+          <div class="persona-badge">
+            <div class="persona-icon">CE</div>
+            <div class="persona-info">
+              <div class="persona-name">Agente OpheraBeauty</div>
+              <div class="persona-role">CEO · Consultor estratégico · E-commerce UY</div>
+            </div>
+            <div class="persona-status">
+              <div class="status-dot" style="width:6px;height:6px;"></div>
+              Activo
+            </div>
+          </div>
+
+          <!-- Messages -->
+          <div class="chat-history" id="chatHistory">
+            <div class="chat-message bot">
+              <div class="msg-avatar bot">CE</div>
+              <div>
+                <div class="msg-bubble">
+                  <p>¡Hola! Soy tu agente de confianza para este emprendimiento. Podés preguntarme sobre <strong>estrategia de negocio</strong>, <strong>productos</strong>, <strong>marketing</strong>, <strong>tareas pendientes</strong> o cualquier duda que tengas.</p>
+                  <p>Estoy acá para ayudarte como CEO y consultor. ¿Con qué arrancamos?</p>
+                </div>
+                <div class="msg-time" id="initTime"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Input bar -->
+          <div class="chat-input-bar">
+            <div class="chat-input-wrap">
+              <textarea
+                class="chat-input"
+                id="chatInput"
+                rows="1"
+                placeholder="Preguntá sobre estrategia, productos, tareas pendientes…"
+              ></textarea>
+            </div>
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Enviar">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 8h12M9 4l5 4-5 4"/>
+              </svg>
+            </button>
+          </div>
+          <div class="chat-hint">Enter para enviar · Shift+Enter para nueva línea</div>
+        </div>
+      </div>
+
+    </div><!-- /.content -->
+  </main>
+</div><!-- /.shell -->
+
+<script>
+// ════════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════════════════════════
+const BACKEND = 'http://localhost:8000';
+
+const sections = document.querySelectorAll('.section');
+const navItems = document.querySelectorAll('.nav-item');
+const topbarTitle = document.getElementById('topbarTitle');
+
+const SECTION_TITLES = {
+  dashboard:    'Dashboard',
+  buscador:     'Buscador de Productos',
+  calculadora:  'Calculadora de Ganancias',
+  contenido:    'Creador de Contenido',
+  campana:      'Creador de Campaña',
+  agente:       'Agente'
+};
+
+navItems.forEach(item => {
+  item.addEventListener('click', () => {
+    const target = item.dataset.section;
+    navItems.forEach(n => n.classList.remove('active'));
+    item.classList.add('active');
+    sections.forEach(s => s.classList.remove('active'));
+    const sec = document.getElementById('section-' + target);
+    if (sec) sec.classList.add('active');
+    topbarTitle.textContent = SECTION_TITLES[target] || target;
+    window.location.hash = target;
+  });
+});
+
+// Restore section from hash
+function restoreSection() {
+  const hash = window.location.hash.replace('#', '');
+  if (hash && document.getElementById('section-' + hash)) {
+    const item = document.querySelector(`.nav-item[data-section="${hash}"]`);
+    if (item) item.click();
+  }
+}
+window.addEventListener('hashchange', restoreSection);
+restoreSection();
+
+// ════════════════════════════════════════════════════════════════
+//  BACKEND STATUS CHECK
+// ════════════════════════════════════════════════════════════════
+async function checkBackend() {
+  const el = document.getElementById('backendStatus');
+  try {
+    const r = await fetch(BACKEND + '/', { signal: AbortSignal.timeout(3000) });
+    if (r.ok) {
+      el.textContent = 'Backend activo';
+      el.style.color = 'var(--success)';
+    } else {
+      throw new Error();
+    }
+  } catch {
+    el.textContent = 'Backend desconectado';
+    el.style.color = 'var(--danger)';
+  }
+}
+checkBackend();
+setInterval(checkBackend, 30000);
+
+// ════════════════════════════════════════════════════════════════
+//  CALCULADORA
+// ════════════════════════════════════════════════════════════════
+const INPUTS = ['c_compra','c_envio','c_otros','c_tc','c_comision','c_venta','c_cantidad'];
+INPUTS.forEach(id => {
+  document.getElementById(id).addEventListener('input', calcular);
+});
+
+// Default tipo de cambio
+document.getElementById('c_tc').value = '43.5';
+
+function getVal(id) {
+  return parseFloat(document.getElementById(id).value) || 0;
+}
+
+function fmt(n, dec = 0) {
+  return n.toLocaleString('es-UY', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+}
+
+function calcular() {
+  const compra   = getVal('c_compra');
+  const envio    = getVal('c_envio');
+  const otros    = getVal('c_otros');
+  const tc       = getVal('c_tc') || 43.5;
+  const comPct   = getVal('c_comision');
+  const venta    = getVal('c_venta');
+  const cantidad = Math.max(1, Math.round(getVal('c_cantidad') || 1));
+
+  if (compra === 0 && venta === 0) {
+    resetDisplay();
+    return;
+  }
+
+  const costoUSD      = compra + envio + otros;
+  const costoUYU      = costoUSD * tc;
+  const comisionUYU   = venta * (comPct / 100);
+  const gananciaUYU   = venta - costoUYU - comisionUYU;
+  const gananciaUSD   = gananciaUYU / tc;
+  const margen        = venta > 0 ? (gananciaUYU / venta) * 100 : 0;
+  const roi           = costoUYU > 0 ? (gananciaUYU / costoUYU) * 100 : 0;
+  const multiplicador = costoUYU > 0 ? venta / costoUYU : 0;
+
+  // Totales por cantidad
+  const totalGananciaUYU   = gananciaUYU   * cantidad;
+  const totalGananciaUSD   = gananciaUSD   * cantidad;
+  const totalInversionUYU  = costoUYU      * cantidad;
+  const totalIngresosUYU   = venta         * cantidad;
+  const totalComisionesUYU = comisionUYU   * cantidad;
+
+  // Classify
+  const state = margen < 20 ? 'negative' : margen < 40 ? 'neutral' : 'positive';
+  const cls   = margen < 20 ? 'bad'      : margen < 40 ? 'warn'    : 'ok';
+
+  // Ganancia main
+  const rGan = document.getElementById('r_ganancia_uyu');
+  rGan.textContent = (gananciaUYU >= 0 ? '$ ' : '−$ ') + fmt(Math.abs(gananciaUYU));
+  rGan.className = 'result-value ' + state;
+
+  document.getElementById('r_ganancia_usd').textContent =
+    (gananciaUSD >= 0 ? '+' : '') + fmt(gananciaUSD, 2) + ' USD';
+
+  // Margen gauge
+  document.getElementById('r_margen_pct').textContent = fmt(margen, 1) + '%';
+  const bar = document.getElementById('gaugeBar');
+  const pct = Math.max(0, Math.min(100, margen));
+  bar.style.width = pct + '%';
+  bar.style.background = margen < 20
+    ? 'var(--danger)' : margen < 40
+    ? 'var(--warn)' : 'var(--success)';
+
+  // Metrics
+  document.getElementById('r_roi').textContent = fmt(roi, 1) + '%';
+  document.getElementById('r_roi').className = 'metric-val ' + cls;
+
+  document.getElementById('r_multi').textContent = fmt(multiplicador, 2) + 'x';
+  document.getElementById('r_multi').className = 'metric-val ' + cls;
+
+  document.getElementById('r_costo_uyu').textContent = '$ ' + fmt(costoUYU);
+  document.getElementById('r_comision_uyu').textContent = '$ ' + fmt(comisionUYU);
+
+  // Proyección por cantidad
+  const rTotalUYU = document.getElementById('r_total_uyu');
+  rTotalUYU.textContent = (totalGananciaUYU >= 0 ? '$ ' : '−$ ') + fmt(Math.abs(totalGananciaUYU));
+  rTotalUYU.className = 'result-value ' + state;
+  document.getElementById('r_total_usd').textContent =
+    (totalGananciaUSD >= 0 ? '+' : '') + fmt(totalGananciaUSD, 2) + ' USD · ' + cantidad + ' unid.';
+  document.getElementById('r_cant').textContent = cantidad + ' u.';
+  document.getElementById('r_inversion_total').textContent = '$ ' + fmt(totalInversionUYU);
+  document.getElementById('r_ingresos_total').textContent  = '$ ' + fmt(totalIngresosUYU);
+  document.getElementById('r_ingresos_total').className = 'metric-val ' + cls;
+  document.getElementById('r_comisiones_total').textContent = '−$ ' + fmt(totalComisionesUYU);
+
+  // Desglose
+  const rows = [
+    ['Precio de compra',      `${fmt(compra, 2)} USD`,                               ''],
+    ['Costo de envío',        `${fmt(envio, 2)} USD`,                                ''],
+    ['Otros costos',          `${fmt(otros, 2)} USD`,                                ''],
+    ['─',                     '',                                                     ''],
+    ['Costo total (USD)',      `${fmt(costoUSD, 2)} USD`,                             'var(--text-dim)'],
+    ['Costo total (UYU)',      `$ ${fmt(costoUYU)}`,                                  'var(--text-dim)'],
+    ['Precio de venta',       `$ ${fmt(venta)}`,                                      ''],
+    ['Comisión plataforma',   `−$ ${fmt(comisionUYU)} (${comPct}%)`,                 'var(--danger)'],
+    ['─',                     '',                                                     ''],
+    ['Ganancia neta (UYU)',   `${gananciaUYU >= 0 ? '$ ' : '−$ '}${fmt(Math.abs(gananciaUYU))}`, gananciaUYU >= 0 ? 'var(--success)' : 'var(--danger)'],
+    ['Ganancia neta (USD)',   `${fmt(gananciaUSD, 2)} USD`,                           gananciaUSD >= 0 ? 'var(--success)' : 'var(--danger)'],
+    ['Margen',                `${fmt(margen, 2)}%`,                                   margen < 20 ? 'var(--danger)' : margen < 40 ? 'var(--warn)' : 'var(--success)'],
+    ['ROI',                   `${fmt(roi, 2)}%`,                                      roi < 50 ? 'var(--danger)' : roi < 100 ? 'var(--warn)' : 'var(--success)'],
+    ['Multiplicador',         `${fmt(multiplicador, 2)}x`,                            ''],
+  ];
+
+  const tbody = document.getElementById('desglose');
+  tbody.innerHTML = rows.map(([label, val, color]) => {
+    if (label === '─') return `<tr><td colspan="2" style="height:8px;border-bottom:1px solid var(--border-light);"></td></tr>`;
+    return `
+      <tr>
+        <td style="padding:0.4rem 0;color:var(--text-dim);">${label}</td>
+        <td style="padding:0.4rem 0;text-align:right;font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:${color||'var(--text)'};">${val}</td>
+      </tr>`;
+  }).join('');
+}
+
+function resetDisplay() {
+  document.getElementById('r_ganancia_uyu').textContent = '—';
+  document.getElementById('r_ganancia_uyu').className = 'result-value neutral';
+  document.getElementById('r_ganancia_usd').textContent = 'Ingresá los valores para calcular';
+  document.getElementById('r_margen_pct').textContent = '—';
+  document.getElementById('gaugeBar').style.width = '0%';
+  ['r_roi','r_multi','r_costo_uyu','r_comision_uyu'].forEach(id => {
+    document.getElementById(id).textContent = '—';
+    document.getElementById(id).className = 'metric-val';
+  });
+  document.getElementById('r_total_uyu').textContent = '—';
+  document.getElementById('r_total_uyu').className = 'result-value neutral';
+  document.getElementById('r_total_usd').textContent = 'Ajustá la cantidad de unidades';
+  ['r_cant','r_inversion_total','r_ingresos_total','r_comisiones_total'].forEach(id => {
+    document.getElementById(id).textContent = '—';
+  });
+  document.getElementById('desglose').innerHTML =
+    '<tr><td colspan="2" style="color:var(--muted);padding:0.5rem 0;">Ingresá los valores para ver el desglose.</td></tr>';
+}
+
+function resetCalc() {
+  ['c_compra','c_envio','c_otros','c_comision','c_venta'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('c_tc').value = '43.5';
+  document.getElementById('c_cantidad').value = '1';
+  resetDisplay();
+}
+
+function fillScenario(compra, envio, otros, tc, comision, venta) {
+  document.getElementById('c_compra').value    = compra;
+  document.getElementById('c_envio').value     = envio;
+  document.getElementById('c_otros').value     = otros;
+  document.getElementById('c_tc').value        = tc;
+  document.getElementById('c_comision').value  = comision;
+  document.getElementById('c_venta').value     = venta;
+  calcular();
+  // Switch to calculadora section if not already there
+  document.querySelector('.nav-item[data-section="calculadora"]').click();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  AGENTE / CHATBOT
+// ════════════════════════════════════════════════════════════════
+const chatHistory = document.getElementById('chatHistory');
+const chatInput   = document.getElementById('chatInput');
+const sendBtn     = document.getElementById('sendBtn');
+
+// Set init time
+document.getElementById('initTime').textContent = now();
+
+// Chat message history for API
+let messages = [];
+
+chatInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+  // Auto-resize textarea
+  setTimeout(() => {
+    chatInput.style.height = 'auto';
+    chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+  }, 0);
+});
+
+function now() {
+  return new Date().toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' });
+}
+
+function appendMessage(role, text) {
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-message ' + role;
+
+  const initials = role === 'bot' ? 'CE' : 'TU';
+  wrap.innerHTML = `
+    <div class="msg-avatar ${role}">${initials}</div>
+    <div>
+      <div class="msg-bubble"><p>${escapeHtml(text).replace(/\n/g, '</p><p>')}</p></div>
+      <div class="msg-time">${now()}</div>
+    </div>`;
+
+  chatHistory.appendChild(wrap);
+  chatHistory.scrollTop = chatHistory.scrollHeight;
+  return wrap;
+}
+
+function showTyping() {
+  const el = document.createElement('div');
+  el.className = 'chat-message bot typing-indicator';
+  el.id = 'typingIndicator';
+  el.innerHTML = `
+    <div class="msg-avatar bot">CE</div>
+    <div class="typing-dots">
+      <span></span><span></span><span></span>
+    </div>`;
+  chatHistory.appendChild(el);
+  chatHistory.scrollTop = chatHistory.scrollHeight;
+}
+
+function hideTyping() {
+  const el = document.getElementById('typingIndicator');
+  if (el) el.remove();
+}
+
+function escapeHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+async function sendMessage() {
+  const text = chatInput.value.trim();
+  if (!text) return;
+
+  chatInput.value = '';
+  chatInput.style.height = 'auto';
+  sendBtn.disabled = true;
+
+  appendMessage('user', text);
+  messages.push({ role: 'user', content: text });
+
+  showTyping();
+
+  try {
+    const res = await fetch(BACKEND + '/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages })
+    });
+
+    hideTyping();
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Error desconocido' }));
+      appendMessage('bot', '⚠️ Error: ' + (err.detail || 'No se pudo conectar con el agente.'));
+    } else {
+      const data = await res.json();
+      const reply = data.response || 'No entendí la respuesta.';
+      appendMessage('bot', reply);
+      messages.push({ role: 'assistant', content: reply });
+    }
+  } catch (e) {
+    hideTyping();
+    appendMessage('bot', '⚠️ No se pudo conectar con el backend. ¿Está corriendo el servidor en localhost:8000?');
+  }
+
+  sendBtn.disabled = false;
+  chatInput.focus();
+}
+</script>
+</body>
+</html>
