@@ -23,3 +23,6 @@ env/
 # OS
 .DS_Store
 Thumbs.db
+
+# Carpeta backend vieja (archivos bloqueados)
+Pagina/backend/

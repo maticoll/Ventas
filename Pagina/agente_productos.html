@@ -665,7 +665,7 @@
       <div class="api-row">
         <div class="field">
           <label>URL del Backend</label>
-          <input type="text" id="api-url" placeholder="https://tu-app.onrender.com" value="http://localhost:8000">
+          <input type="text" id="api-url" placeholder="https://tu-app.vercel.app" id="api-url-input">
         </div>
         <div class="api-status ok" id="api-status">✓ Backend local</div>
       </div>
@@ -1086,7 +1086,8 @@
     const dataEl    = document.getElementById(`ml-data-${index}`);
 
     try {
-      const apiUrl = (document.getElementById('api-url').value.trim() || 'http://localhost:8000').replace(/\/$/, '');
+      const defaultUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:8000' : '';
+      const apiUrl = (document.getElementById('api-url').value.trim() || defaultUrl).replace(/\/$/, '');
       const resp = await fetch(`${apiUrl}/api/ml/precios?q=${encodeURIComponent(termino)}`);
       if (!resp.ok) throw new Error(`Error ${resp.status}`);
       const data = await resp.json();
