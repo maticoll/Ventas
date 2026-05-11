@@ -956,13 +956,103 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 2px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+    /* ─── Hamburger (only mobile) ───────────────────────────────── */
+    .hamburger {
+      display: none; align-items: center; justify-content: center;
+      width: 36px; height: 36px; flex-shrink: 0;
+      background: none; border: none; border-radius: 6px;
+      cursor: pointer; color: var(--text-dim);
+      transition: background 0.15s, color 0.15s;
+    }
+    .hamburger:hover { background: var(--surface); color: var(--text); }
+
+    /* Sidebar overlay backdrop */
+    .sidebar-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(30,12,20,0.4);
+      backdrop-filter: blur(2px);
+      z-index: 150;
+    }
+    .sidebar-overlay.open { display: block; }
+
+    /* ─── Mobile responsive ─────────────────────────────────────── */
+    @media (max-width: 768px) {
+      /* Sidebar becomes a fixed drawer */
+      .sidebar {
+        position: fixed; left: 0; top: 0; bottom: 0;
+        height: 100%; z-index: 200;
+        transform: translateX(-105%);
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 4px 0 24px rgba(45,27,37,0.12);
+      }
+      .sidebar.open { transform: translateX(0); }
+
+      /* Show hamburger */
+      .hamburger { display: flex; }
+
+      /* Shell fills viewport */
+      .shell { height: auto; min-height: 100vh; overflow: auto; }
+      .main { height: 100vh; }
+
+      /* Topbar */
+      .topbar { padding: 0 0.85rem; gap: 0.5rem; }
+      .topbar-title { font-size: 0.88rem; }
+      .status-text { display: none; }
+
+      /* Content */
+      .content { overflow-y: auto; }
+      .section-pad { padding: 1.1rem 1rem; }
+
+      /* Section header */
+      .section-header h2 { font-size: 1.2rem; }
+
+      /* Calculator */
+      .calc-layout { grid-template-columns: 1fr; }
+      .input-row { grid-template-columns: 1fr 1fr; }
+      .card-block { padding: 1.1rem; }
+      .scenarios { margin-top: 1rem; }
+      .scenario-chip { font-size: 0.78rem; padding: 0.55rem 0.75rem; }
+
+      /* Chat */
+      .chat-history { padding: 0.9rem 0.85rem; gap: 0.75rem; }
+      .chat-input-bar { padding: 0.75rem 0.85rem; gap: 0.5rem; }
+      .msg-bubble { max-width: calc(100vw - 80px); font-size: 0.85rem; }
+      .chat-hint { font-size: 0.65rem; padding-bottom: 0.15rem; }
+      .persona-badge { padding: 0.65rem 0.85rem; }
+
+      /* Notas */
+      .notas-header { padding: 1rem 1rem 0.75rem; flex-wrap: wrap; }
+      .notas-header h2 { font-size: 1.1rem; }
+      .notas-filter { padding: 0.5rem 1rem; }
+      .notas-body { padding: 0.85rem 1rem; grid-template-columns: 1fr; }
+
+      /* Modal */
+      .modal-box {
+        margin: 1rem; width: calc(100% - 2rem);
+        max-width: none; border-radius: 12px;
+        padding: 1.5rem 1.25rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .topbar-title { font-size: 0.82rem; }
+      .section-pad { padding: 0.9rem 0.85rem; }
+      .input-row { grid-template-columns: 1fr; }
+      .metrics-grid { grid-template-columns: 1fr 1fr; }
+      .result-value { font-size: 1.9rem; }
+      .msg-bubble { max-width: calc(100vw - 70px); font-size: 0.82rem; }
+    }
   </style>
 </head>
 <body>
 <div class="shell">
 
+  <!-- Mobile sidebar overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
   <!-- ═══════════════ SIDEBAR ═══════════════ -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <div>
         <div class="logo-mark">Ophera<em>Beauty</em></div>
@@ -1051,6 +1141,11 @@
 
     <!-- Topbar -->
     <div class="topbar">
+      <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Menú">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="2" y1="4" x2="16" y2="4"/><line x1="2" y1="9" x2="16" y2="9"/><line x1="2" y1="14" x2="16" y2="14"/>
+        </svg>
+      </button>
       <div>
         <div class="topbar-title" id="topbarTitle">Dashboard</div>
       </div>
@@ -1886,6 +1981,24 @@ async function eliminarNota(id) {
 document.querySelectorAll('.nav-item').forEach(item => {
   item.addEventListener('click', () => {
     if (item.dataset.section === 'notas') cargarNotas();
+  });
+});
+
+// ════════════════════════════════════════════════════════════════
+//  SIDEBAR MOBILE TOGGLE
+// ════════════════════════════════════════════════════════════════
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+// Close sidebar on nav item click (mobile)
+navItems.forEach(item => {
+  item.addEventListener('click', () => {
+    if (window.innerWidth <= 768) closeSidebar();
   });
 });
 </script>

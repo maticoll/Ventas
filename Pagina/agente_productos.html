@@ -641,6 +641,33 @@
   }
 
   footer em { font-style: italic; color: var(--rose-mid); }
+
+  /* ─── Mobile responsive ─────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .header { padding: 0 1rem; height: 52px; }
+    .header-sub { display: none; }
+    .mode-pill { font-size: 0.65rem; padding: 0.2rem 0.6rem; }
+    .main { padding: 1.25rem 1rem 3rem; }
+    .config-panel { padding: 1.1rem; }
+    .config-grid { grid-template-columns: 1fr 1fr; }
+    .api-row { flex-direction: column; gap: 0.5rem; }
+    .api-status { align-self: flex-start; }
+    .btn-search { padding: 0.8rem 2rem; font-size: 0.88rem; }
+  }
+
+  @media (max-width: 480px) {
+    .header-brand { font-size: 0.95rem; }
+    .main { padding: 1rem 0.85rem 3rem; }
+    .config-grid { grid-template-columns: 1fr; }
+    .results-header { flex-wrap: wrap; gap: 0.5rem; }
+    .results-header h2 { font-size: 0.9rem; }
+    .btn-search { width: 100%; justify-content: center; }
+
+    /* Cards */
+    .card-header { padding: 1rem 1rem; gap: 0.75rem; }
+    .card-title-block h3 { font-size: 1rem; }
+    .score-badge { width: 44px; height: 44px; font-size: 1rem; }
+  }
 </style>
 </head>
 <body>
