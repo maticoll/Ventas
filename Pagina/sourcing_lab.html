@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sourcing Lab — OpheraBeauty</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Nunito:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #FDF6F1; --sidebar-bg: #FFFFFF; --surface: #FFF8F5; --surface-2: #FAF0F4;
+      --card: #FFFFFF; --border: #EDD8DE; --border-light: #F5E5E8;
+      --gold: #C4607A; --gold-dim: rgba(196,96,122,0.08); --orange: #E8A4B8;
+      --text: #2D1B25; --text-dim: #7A5565; --muted: #B08A96;
+      --success: #5A9E7A; --success-bg: rgba(90,158,122,0.1);
+      --warn: #C9956A; --warn-bg: rgba(201,149,106,0.1);
+      --danger: #C44A62; --danger-bg: rgba(196,74,98,0.1);
+      --sidebar-w: 240px; --header-h: 60px;
+    }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Nunito', sans-serif; }
+    body { background: linear-gradient(150deg,#FDF6F1 0%,#FBF0F4 50%,#F8EAF0 100%); background-attachment: fixed; }
+
+    /* ── Layout ── */
+    .shell { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w); min-width: var(--sidebar-w);
+      background: var(--sidebar-bg); border-right: 1px solid var(--border);
+      box-shadow: 2px 0 16px rgba(196,96,122,0.06);
+      display: flex; flex-direction: column; position: relative; z-index: 10;
+    }
+    .sidebar::after { content:''; position:absolute; top:0; left:0; width:2px; height:100%;
+      background:linear-gradient(to bottom,transparent,#E8A4B8 20%,#C4607A 50%,#E8A4B8 80%,transparent); opacity:.5; }
+    .sidebar-logo { padding:1.5rem 1.25rem 1.25rem; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:.5rem; }
+    .logo-mark { font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; letter-spacing:-.02em; line-height:1; color:var(--text); }
+    .logo-mark em { font-style:italic; color:var(--gold); }
+    .logo-sub { font-size:.65rem; color:var(--muted); text-transform:uppercase; letter-spacing:.12em; margin-top:.1rem; }
+    .sidebar-nav { flex:1; padding:1rem .5rem; display:flex; flex-direction:column; gap:.15rem; overflow-y:auto; }
+    .nav-section-label { font-size:.65rem; font-weight:600; text-transform:uppercase; letter-spacing:.14em; color:var(--muted); padding:.75rem .75rem .35rem; }
+    .nav-item { display:flex; align-items:center; gap:.75rem; padding:.6rem .75rem; border-radius:6px; cursor:pointer; font-size:.875rem; font-weight:500; color:var(--text-dim); transition:background .15s,color .15s; border:1px solid transparent; text-decoration:none; }
+    .nav-item:hover { background:var(--surface); color:var(--text); }
+    .nav-item.active { background:var(--gold-dim); color:var(--gold); border-color:rgba(196,96,122,.18); }
+    .nav-item svg { width:16px; height:16px; flex-shrink:0; opacity:.7; }
+    .nav-item.active svg { opacity:1; }
+    .nav-divider { height:1px; background:var(--border); margin:.5rem .75rem; }
+    .sidebar-footer { padding:1rem 1.25rem; border-top:1px solid var(--border); display:flex; align-items:center; gap:.75rem; }
+    .avatar { width:30px; height:30px; background:linear-gradient(135deg,#E8A4B8,#C4607A); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.72rem; color:#fff; flex-shrink:0; }
+    .user-name { font-size:.8rem; font-weight:600; }
+    .user-role { font-size:.7rem; color:var(--muted); }
+
+    /* ── Main ── */
+    .main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+    .topbar { height:var(--header-h); border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 1.75rem; gap:1rem; flex-shrink:0; background:var(--sidebar-bg); }
+    .topbar-title { font-family:'Playfair Display',serif; font-size:.95rem; font-weight:700; letter-spacing:-.02em; }
+    .topbar-breadcrumb { font-size:.78rem; color:var(--muted); }
+    .topbar-breadcrumb span { color:var(--text-dim); }
+    .topbar-right { margin-left:auto; display:flex; align-items:center; gap:.75rem; }
+    .content { flex:1; overflow-y:auto; overflow-x:hidden; }
+
+    /* ── Page header ── */
+    .page-header { padding:1.75rem 1.75rem 1.25rem; border-bottom:1px solid var(--border-light); }
+    .page-header-top { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+    .page-header h1 { font-family:'Playfair Display',serif; font-size:1.55rem; font-weight:700; letter-spacing:-.02em; }
+    .page-header h1 em { font-style:italic; color:var(--gold); }
+    .page-header p { font-size:.85rem; color:var(--text-dim); margin-top:.3rem; max-width:520px; }
+    .btn-nuevo { display:flex; align-items:center; gap:.45rem; padding:.6rem 1.15rem; background:var(--gold); color:#fff; border:none; border-radius:7px; font-family:'Nunito',sans-serif; font-size:.82rem; font-weight:700; cursor:pointer; transition:opacity .15s; white-space:nowrap; flex-shrink:0; }
+    .btn-nuevo:hover { opacity:.88; }
+
+    /* ── Filters ── */
+    .filter-bar { display:flex; align-items:center; gap:.5rem; margin-top:1.1rem; flex-wrap:wrap; }
+    .filter-chip { padding:.3rem .8rem; border-radius:20px; font-size:.78rem; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--text-dim); cursor:pointer; transition:all .15s; user-select:none; }
+    .filter-chip:hover { border-color:var(--gold); color:var(--gold); }
+    .filter-chip.active { background:var(--gold-dim); border-color:rgba(196,96,122,.35); color:var(--gold); }
+
+    /* ── KPI strip ── */
+    .kpi-strip { display:flex; gap:1px; background:var(--border); border-bottom:1px solid var(--border); border-top:1px solid var(--border-light); }
+    .kpi-cell { flex:1; padding:.9rem 1.25rem; background:var(--card); display:flex; flex-direction:column; gap:.15rem; }
+    .kpi-label { font-size:.68rem; font-weight:600; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); }
+    .kpi-value { font-family:'JetBrains Mono',monospace; font-size:1.25rem; font-weight:600; color:var(--text); }
+    .kpi-sub { font-size:.7rem; color:var(--text-dim); }
+
+    /* ── Cards area ── */
+    .cards-area { padding:1.5rem 1.75rem; }
+    .section-label { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.14em; color:var(--muted); margin-bottom:.75rem; display:flex; align-items:center; gap:.5rem; }
+    .section-label::after { content:''; flex:1; height:1px; background:var(--border-light); }
+    .cards-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:1rem; margin-bottom:2rem; }
+
+    /* ── Product card ── */
+    .product-card { background:var(--card); border:1px solid var(--border); border-radius:10px; overflow:hidden; transition:box-shadow .2s,border-color .2s; }
+    .product-card:hover { box-shadow:0 4px 20px rgba(196,96,122,.1); border-color:var(--orange); }
+    .product-card.hidden { display:none; }
+
+    .card-top { padding:1rem 1.1rem .85rem; border-bottom:1px solid var(--border-light); display:flex; flex-direction:column; gap:.45rem; }
+    .card-badges { display:flex; align-items:center; gap:.4rem; flex-wrap:wrap; }
+    .badge { font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; padding:.18rem .5rem; border-radius:4px; }
+    .badge-brand { background:var(--surface-2); color:var(--text-dim); border:1px solid var(--border-light); }
+    .badge-cat { background:var(--gold-dim); color:var(--gold); border:1px solid rgba(196,96,122,.2); }
+    .badge-country { background:rgba(59,130,246,.08); color:#2563eb; border:1px solid rgba(59,130,246,.2); }
+    .card-name { font-family:'Playfair Display',serif; font-size:.95rem; font-weight:600; line-height:1.35; }
+
+    .card-prices { display:grid; grid-template-columns:1fr 1fr; }
+    .price-col { padding:.85rem 1.1rem; border-right:1px solid var(--border-light); display:flex; flex-direction:column; gap:.2rem; }
+    .price-col:last-child { border-right:none; }
+    .price-col-label { font-size:.65rem; font-weight:600; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); }
+    .price-main { font-family:'JetBrains Mono',monospace; font-size:1.05rem; font-weight:600; color:var(--text); }
+    .price-sub { font-size:.72rem; color:var(--text-dim); }
+    .price-usd { font-size:.7rem; color:var(--muted); margin-top:.1rem; }
+
+    .margin-row { padding:.6rem 1.1rem; border-top:1px solid var(--border-light); display:flex; align-items:center; gap:.6rem; }
+    .margin-label { font-size:.72rem; color:var(--text-dim); }
+    .margin-pill { font-family:'JetBrains Mono',monospace; font-size:.78rem; font-weight:700; padding:.18rem .6rem; border-radius:20px; }
+    .margin-high { background:var(--success-bg); color:var(--success); }
+    .margin-mid  { background:var(--warn-bg); color:var(--warn); }
+    .margin-low  { background:var(--danger-bg); color:var(--danger); }
+    .margin-none { background:var(--surface-2); color:var(--muted); }
+    .margin-bar-wrap { flex:1; height:5px; background:var(--border-light); border-radius:3px; overflow:hidden; }
+    .margin-bar { height:100%; border-radius:3px; }
+    .margin-bar.high { background:var(--success); }
+    .margin-bar.mid  { background:var(--warn); }
+    .margin-bar.low  { background:var(--danger); }
+
+    .card-details { border-top:1px solid var(--border-light); }
+    .detail-row { display:flex; align-items:flex-start; padding:.5rem 1.1rem; border-bottom:1px solid var(--border-light); gap:.75rem; font-size:.79rem; }
+    .detail-row:last-child { border-bottom:none; }
+    .detail-icon { width:14px; flex-shrink:0; opacity:.4; margin-top:.1rem; }
+    .detail-key { color:var(--muted); min-width:105px; flex-shrink:0; }
+    .detail-val { color:var(--text); font-weight:500; flex:1; word-break:break-word; }
+    .card-actions { padding:.65rem 1.1rem; border-top:1px solid var(--border-light); display:flex; gap:.5rem; justify-content:flex-end; }
+    .btn-edit { font-size:.75rem; font-weight:600; padding:.3rem .75rem; border-radius:5px; border:1px solid var(--border); background:var(--surface); color:var(--text-dim); cursor:pointer; transition:all .15s; }
+    .btn-edit:hover { border-color:var(--gold); color:var(--gold); }
+    .btn-del { font-size:.75rem; font-weight:600; padding:.3rem .75rem; border-radius:5px; border:1px solid transparent; background:transparent; color:var(--muted); cursor:pointer; transition:all .15s; }
+    .btn-del:hover { color:var(--danger); background:var(--danger-bg); }
+
+    /* ── Empty state ── */
+    .empty-state { grid-column:1/-1; text-align:center; padding:3.5rem 1rem; color:var(--muted); }
+    .empty-state svg { width:44px; height:44px; opacity:.2; margin:0 auto 1rem; display:block; }
+    .empty-state h3 { font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; color:var(--text-dim); margin-bottom:.4rem; }
+    .empty-state p { font-size:.82rem; }
+
+    /* ── Modal ── */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(30,12,20,.38); backdrop-filter:blur(3px); z-index:200; align-items:center; justify-content:center; padding:1rem; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:1.75rem; width:100%; max-width:560px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(30,12,20,.2); }
+    .modal-title { font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; margin-bottom:1.5rem; display:flex; align-items:center; justify-content:space-between; }
+    .modal-close { background:none; border:none; cursor:pointer; color:var(--muted); font-size:1.2rem; line-height:1; padding:2px; transition:color .15s; }
+    .modal-close:hover { color:var(--text); }
+
+    /* Form grid */
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:.85rem; }
+    .form-grid .full { grid-column:1/-1; }
+    .form-row { display:flex; flex-direction:column; gap:.3rem; }
+    .form-row label { font-size:.72rem; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; }
+    .form-row label span { color:var(--danger); margin-left:.15rem; }
+    .form-row input, .form-row select, .form-row textarea {
+      padding:.55rem .75rem; border:1px solid var(--border); border-radius:7px;
+      font-family:'Nunito',sans-serif; font-size:.88rem; background:var(--surface); color:var(--text);
+      outline:none; transition:border-color .15s; appearance:none; -webkit-appearance:none;
+    }
+    .form-row input:focus, .form-row select:focus, .form-row textarea:focus { border-color:var(--gold); }
+    .form-row textarea { resize:vertical; min-height:60px; }
+    .form-row .hint { font-size:.7rem; color:var(--muted); margin-top:.1rem; }
+
+    /* Calculated preview inside modal */
+    .calc-preview {
+      background:var(--surface); border:1px solid var(--border-light); border-radius:8px;
+      padding:.75rem 1rem; margin-top:.5rem; display:flex; gap:1.5rem; flex-wrap:wrap;
+    }
+    .calc-item { display:flex; flex-direction:column; gap:.15rem; }
+    .calc-item-label { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); }
+    .calc-item-val { font-family:'JetBrains Mono',monospace; font-size:1rem; font-weight:600; color:var(--text); }
+
+    .modal-actions { display:flex; justify-content:flex-end; gap:.65rem; margin-top:1.5rem; }
+    .btn-cancel { padding:.5rem 1rem; background:transparent; border:1px solid var(--border); border-radius:6px; font-size:.82rem; cursor:pointer; color:var(--text-dim); font-family:'Nunito',sans-serif; }
+    .btn-cancel:hover { background:var(--surface); }
+    .btn-guardar { padding:.5rem 1.15rem; background:var(--gold); color:#fff; border:none; border-radius:6px; font-size:.82rem; font-weight:700; cursor:pointer; transition:opacity .15s; font-family:'Nunito',sans-serif; }
+    .btn-guardar:hover { opacity:.88; }
+    .btn-guardar:disabled { opacity:.45; cursor:default; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width:5px; height:5px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+    /* ── Hamburger ── */
+    .hamburger { display:none; align-items:center; justify-content:center; width:36px; height:36px; flex-shrink:0; background:none; border:none; border-radius:6px; cursor:pointer; color:var(--text-dim); transition:background .15s,color .15s; }
+    .hamburger:hover { background:var(--surface); color:var(--text); }
+    .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(30,12,20,.4); backdrop-filter:blur(2px); z-index:150; }
+    .sidebar-overlay.open { display:block; }
+
+    /* ── Mobile ── */
+    @media (max-width:768px) {
+      .sidebar { position:fixed; left:0; top:0; bottom:0; height:100%; z-index:200; transform:translateX(-105%); transition:transform .25s cubic-bezier(.4,0,.2,1); box-shadow:4px 0 24px rgba(45,27,37,.12); }
+      .sidebar.open { transform:translateX(0); }
+      .hamburger { display:flex; }
+      .shell { height:auto; min-height:100vh; }
+      .main { height:100vh; }
+      .topbar { padding:0 .85rem; gap:.5rem; }
+      .topbar-right { flex-wrap:wrap; gap:.35rem; }
+      .topbar-right span { font-size:.68rem; }
+      .page-header { padding:1.1rem 1rem .9rem; }
+      .page-header h1 { font-size:1.25rem; }
+      .kpi-strip { flex-wrap:wrap; }
+      .kpi-cell { flex:1 1 calc(50% - 1px); min-width:0; padding:.75rem 1rem; }
+      .kpi-value { font-size:1rem; }
+      .cards-area { padding:1.1rem 1rem; }
+      .cards-grid { grid-template-columns:1fr; }
+      .card-prices { grid-template-columns:1fr; }
+      .price-col { border-right:none; border-bottom:1px solid var(--border-light); }
+      .price-col:last-child { border-bottom:none; }
+      .form-grid { grid-template-columns:1fr; }
+      .form-grid .full { grid-column:1; }
+      .modal-box { padding:1.4rem 1.1rem; }
+    }
+    @media (max-width:480px) {
+      .kpi-cell { flex:1 1 100%; border-bottom:1px solid var(--border); }
+      .detail-key { min-width:85px; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div>
+        <div class="logo-mark">Ophera<em>Beauty</em></div>
+        <div class="logo-sub">E-Commerce UY</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <a class="nav-item" href="dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item" href="agente_productos.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Agente Buscador
+      </a>
+      <div class="nav-divider"></div>
+      <div class="nav-section-label">Catálogo</div>
+      <a class="nav-item active" href="sourcing_lab.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+        Sourcing Lab
+      </a>
+      <div class="nav-divider"></div>
+      <div class="nav-section-label">Campañas</div>
+      <a class="nav-item" href="dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Meta Ads
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="avatar">OB</div>
+      <div>
+        <div class="user-name">OpheraBeauty</div>
+        <div class="user-role">Admin</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="main">
+    <div class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()" aria-label="Menú">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="2" y1="4" x2="16" y2="4"/><line x1="2" y1="9" x2="16" y2="9"/><line x1="2" y1="14" x2="16" y2="14"/>
+        </svg>
+      </button>
+      <div>
+        <div class="topbar-title">Sourcing Lab</div>
+        <div class="topbar-breadcrumb">Catálogo <span>/ Importación</span></div>
+      </div>
+      <div class="topbar-right">
+        <span id="tcDisplay" style="font-size:.75rem; color:var(--muted);"></span>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Page header -->
+      <div class="page-header">
+        <div class="page-header-top">
+          <div>
+            <h1>Sourcing <em>Lab</em></h1>
+            <p>Comparativo de proveedores por país: costos de origen, márgenes y precios de referencia en Uruguay.</p>
+          </div>
+          <button class="btn-nuevo" onclick="abrirModal()">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 2v12M2 8h12"/></svg>
+            Nuevo producto
+          </button>
+        </div>
+        <div class="filter-bar">
+          <span class="filter-chip active" data-filter="all">Todos</span>
+          <span class="filter-chip" data-filter="cat:serum">Serums</span>
+          <span class="filter-chip" data-filter="cat:limpiador">Limpiadores</span>
+          <span class="filter-chip" data-filter="cat:hidratante">Hidratantes</span>
+          <span class="filter-chip" data-filter="cat:protector">Protectores</span>
+        </div>
+        <div class="filter-bar" id="countryFilters" style="margin-top:.4rem;"></div>
+      </div>
+
+      <!-- KPI strip -->
+      <div class="kpi-strip">
+        <div class="kpi-cell">
+          <div class="kpi-label">Entradas registradas</div>
+          <div class="kpi-value" id="kpiTotal">—</div>
+          <div class="kpi-sub" id="kpiSub">cargando…</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">Margen promedio</div>
+          <div class="kpi-value" id="kpiMargen" style="color:var(--success);">—</div>
+          <div class="kpi-sub">sobre precio de venta sugerido</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">Mejor margen</div>
+          <div class="kpi-value" id="kpiBest" style="font-size:.85rem; font-family:'Nunito',sans-serif; padding-top:2px;">—</div>
+          <div class="kpi-sub" id="kpiBestSub" style="color:var(--success); font-weight:700;"></div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">Países relevados</div>
+          <div class="kpi-value" id="kpiPaises" style="font-size:1rem; font-family:'Nunito',sans-serif; padding-top:3px;">—</div>
+          <div class="kpi-sub" id="kpiPaisesSub"></div>
+        </div>
+      </div>
+
+      <!-- Cards -->
+      <div class="cards-area" id="cardsArea">
+        <div class="cards-grid" id="cardsGrid">
+          <div class="empty-state">
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 8h32v32H8z"/><path d="M16 24h16M24 16v16"/></svg>
+            <h3>Cargando datos…</h3>
+            <p>Conectando con el backend</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal ── -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span id="modalTitleText">Nuevo producto</span>
+      <button class="modal-close" onclick="cerrarModal()">✕</button>
+    </div>
+
+    <div class="form-grid">
+      <!-- Nombre -->
+      <div class="form-row full">
+        <label>Producto <span>*</span></label>
+        <input type="text" id="f_producto" placeholder="ej: Vichy Mineral 89 Serum (50 ml)" />
+      </div>
+      <!-- Marca + Presentación -->
+      <div class="form-row">
+        <label>Marca</label>
+        <input type="text" id="f_marca" placeholder="ej: Vichy" />
+      </div>
+      <div class="form-row">
+        <label>Presentación</label>
+        <input type="text" id="f_presentacion" placeholder="ej: 50 ml" />
+      </div>
+      <!-- Categoría -->
+      <div class="form-row">
+        <label>Categoría</label>
+        <select id="f_categoria">
+          <option value="">— Seleccioná —</option>
+          <option value="serum">Serum</option>
+          <option value="limpiador">Limpiador facial</option>
+          <option value="hidratante">Hidratante</option>
+          <option value="protector">Protector solar</option>
+          <option value="contorno">Contorno de ojos</option>
+          <option value="exfoliante">Exfoliante</option>
+          <option value="tónico">Tónico</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <!-- País de origen -->
+      <div class="form-row">
+        <label>País de origen <span>*</span></label>
+        <select id="f_pais" onchange="onPaisChange()">
+          <option value="">— Seleccioná —</option>
+          <option value="Estados Unidos" data-bandera="🇺🇸" data-moneda="USD" data-tc="42">🇺🇸 Estados Unidos</option>
+          <option value="Brasil" data-bandera="🇧🇷" data-moneda="BRL" data-tc="12">🇧🇷 Brasil</option>
+          <option value="China" data-bandera="🇨🇳" data-moneda="USD" data-tc="42">🇨🇳 China (AliExpress/Alibaba)</option>
+          <option value="Argentina" data-bandera="🇦🇷" data-moneda="ARS" data-tc="0.045">🇦🇷 Argentina</option>
+          <option value="España" data-bandera="🇪🇸" data-moneda="EUR" data-tc="46">🇪🇸 España</option>
+          <option value="Francia" data-bandera="🇫🇷" data-moneda="EUR" data-tc="46">🇫🇷 Francia</option>
+          <option value="Alemania" data-bandera="🇩🇪" data-moneda="EUR" data-tc="46">🇩🇪 Alemania</option>
+          <option value="Reino Unido" data-bandera="🇬🇧" data-moneda="GBP" data-tc="53">🇬🇧 Reino Unido</option>
+          <option value="México" data-bandera="🇲🇽" data-moneda="MXN" data-tc="2.2">🇲🇽 México</option>
+          <option value="Chile" data-bandera="🇨🇱" data-moneda="CLP" data-tc="0.046">🇨🇱 Chile</option>
+          <option value="Colombia" data-bandera="🇨🇴" data-moneda="COP" data-tc="0.01">🇨🇴 Colombia</option>
+          <option value="Otro" data-bandera="🌍" data-moneda="USD" data-tc="42">🌍 Otro</option>
+        </select>
+      </div>
+      <!-- Moneda + Tipo de cambio -->
+      <div class="form-row">
+        <label>Moneda</label>
+        <input type="text" id="f_moneda" placeholder="USD" maxlength="6" style="font-family:'JetBrains Mono',monospace;" />
+      </div>
+      <div class="form-row">
+        <label>Tipo de cambio (→ UYU)</label>
+        <input type="number" id="f_tc" placeholder="42" step="0.01" min="0" oninput="recalcPreview()" />
+        <div class="hint">Cuántos UYU vale 1 unidad de la moneda</div>
+      </div>
+      <!-- Precio origen + Proveedor -->
+      <div class="form-row">
+        <label>Precio en origen <span id="monedaLabel">(moneda)</span></label>
+        <input type="number" id="f_precio_origen" placeholder="0.00" step="0.01" min="0" oninput="recalcPreview()" />
+      </div>
+      <div class="form-row">
+        <label>Proveedor / Fuente</label>
+        <input type="text" id="f_fuente" placeholder="ej: VichyUSA.com / Ulta" />
+      </div>
+      <!-- Peso + Costo de envío -->
+      <div class="form-row">
+        <label>Peso estimado (kg)</label>
+        <input type="number" id="f_peso" placeholder="0.00" step="0.01" min="0" />
+      </div>
+      <div class="form-row">
+        <label>Costo de envío (UYU)</label>
+        <input type="number" id="f_envio" placeholder="0" step="1" min="0" oninput="recalcPreview()" />
+      </div>
+      <!-- Precio mercado UY + venta sugerido -->
+      <div class="form-row">
+        <label>Precio referencia UY (UYU)</label>
+        <input type="number" id="f_mercado" placeholder="0" step="10" min="0" />
+        <div class="hint">Cuánto cuesta en farmacias / ML Uruguay</div>
+      </div>
+      <div class="form-row">
+        <label>Precio venta sugerido (UYU)</label>
+        <input type="number" id="f_pvp" placeholder="0" step="10" min="0" oninput="recalcPreview()" />
+      </div>
+      <!-- Cálculo en tiempo real -->
+      <div class="form-row full">
+        <label>Vista previa del cálculo</label>
+        <div class="calc-preview">
+          <div class="calc-item">
+            <div class="calc-item-label">Costo origen (UYU)</div>
+            <div class="calc-item-val" id="prev_costo_origen">—</div>
+          </div>
+          <div class="calc-item">
+            <div class="calc-item-label">Costo total UY</div>
+            <div class="calc-item-val" id="prev_costo_total">—</div>
+          </div>
+          <div class="calc-item">
+            <div class="calc-item-label">Margen estimado</div>
+            <div class="calc-item-val" id="prev_margen" style="color:var(--success);">—</div>
+          </div>
+        </div>
+      </div>
+      <!-- Notas -->
+      <div class="form-row full">
+        <label>Notas adicionales</label>
+        <textarea id="f_notas" placeholder="Observaciones, links, comparaciones, etc."></textarea>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-guardar" id="btnGuardar" onclick="guardar()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const BACKEND = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:8000' : '';
+
+let allItems   = [];
+let editingId  = null;
+let activeFilter = 'all';
+
+// ── Sidebar ──────────────────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+// ── Load data ────────────────────────────────────────────────────
+async function loadItems() {
+  try {
+    const res  = await fetch(BACKEND + '/api/sourcing');
+    allItems   = await res.json();
+    renderAll();
+    updateKPIs();
+    buildCountryFilters();
+  } catch(e) {
+    document.getElementById('cardsGrid').innerHTML = `
+      <div class="empty-state">
+        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="24" cy="24" r="20"/><path d="M24 14v10M24 32v1"/></svg>
+        <h3>Sin conexión al backend</h3>
+        <p>Asegurate de que el servidor esté corriendo en localhost:8000</p>
+      </div>`;
+  }
+}
+
+// ── Render ───────────────────────────────────────────────────────
+function renderAll() {
+  let items = allItems;
+  if (activeFilter !== 'all') {
+    if (activeFilter.startsWith('cat:')) {
+      const cat = activeFilter.replace('cat:', '');
+      items = items.filter(i => i.categoria === cat);
+    } else if (activeFilter.startsWith('pais:')) {
+      const pais = activeFilter.replace('pais:', '');
+      items = items.filter(i => i.pais_origen === pais);
+    }
+  }
+
+  // Group by product name
+  const groups = {};
+  items.forEach(i => {
+    const key = (i.marca || '') + '|' + i.producto;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(i);
+  });
+
+  const grid = document.getElementById('cardsGrid');
+  if (items.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 8h32v32H8z"/><path d="M16 24h16M24 16v16"/></svg>
+        <h3>No hay productos todavía</h3>
+        <p>Hacé clic en "Nuevo producto" para agregar el primero.</p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = Object.values(groups).map(group => group.map(item => cardHTML(item)).join('')).join('');
+}
+
+function cardHTML(s) {
+  const costoTotal = s.costo_total_uyu || 0;
+  const pvp = s.precio_venta_sugerido || 0;
+  const m = s.margen_pct;
+  const marginClass = m === null ? 'margin-none' : m >= 50 ? 'margin-high' : m >= 30 ? 'margin-mid' : 'margin-low';
+  const barClass    = m === null ? '' : m >= 50 ? 'high' : m >= 30 ? 'mid' : 'low';
+  const marginText  = m === null ? 'Sin datos' : m.toFixed(1) + '%';
+  const barWidth    = m === null ? 0 : Math.min(100, Math.max(0, m));
+  const bandera     = s.bandera || '🌍';
+  const precio_origen_str = s.precio_origen ? `${s.moneda} ${fmtNum(s.precio_origen, 2)}` : '—';
+  const precio_tc_str = s.tipo_cambio_uyu ? `TC: ${s.moneda} 1 = ${fmtNum(s.tipo_cambio_uyu, 2)} UYU` : '';
+
+  return `
+  <div class="product-card" data-id="${s.id}" data-cat="${s.categoria||''}" data-pais="${s.pais_origen}">
+    <div class="card-top">
+      <div class="card-badges">
+        ${s.marca ? `<span class="badge badge-brand">${esc(s.marca)}</span>` : ''}
+        ${s.categoria ? `<span class="badge badge-cat">${esc(s.categoria)}</span>` : ''}
+        <span class="badge badge-country">${bandera} ${esc(s.pais_origen)}</span>
+      </div>
+      <div class="card-name">${esc(s.producto)}${s.presentacion ? ` <span style="font-size:.8rem;font-weight:400;color:var(--text-dim);">(${esc(s.presentacion)})</span>` : ''}</div>
+    </div>
+    <div class="card-prices">
+      <div class="price-col">
+        <div class="price-col-label">💰 Costo puesto UY</div>
+        <div class="price-main">${costoTotal ? '$' + fmtNum(costoTotal) + ' UYU' : '—'}</div>
+        <div class="price-sub">${s.fuente ? esc(s.fuente) : 'sin proveedor'}</div>
+        <div class="price-usd">${precio_origen_str}${precio_tc_str ? ' · ' + precio_tc_str : ''}</div>
+      </div>
+      <div class="price-col">
+        <div class="price-col-label">🏷️ Precio de venta sugerido</div>
+        <div class="price-main">${pvp ? '$' + fmtNum(pvp) + ' UYU' : '—'}</div>
+        <div class="price-sub">${s.precio_mercado_uy ? 'ref. mercado: $' + fmtNum(s.precio_mercado_uy) : 'sin referencia local'}</div>
+      </div>
+    </div>
+    <div class="margin-row">
+      <span class="margin-label">Margen bruto:</span>
+      <span class="margin-pill ${marginClass}">${marginText}</span>
+      <div class="margin-bar-wrap"><div class="margin-bar ${barClass}" style="width:${barWidth}%"></div></div>
+    </div>
+    <div class="card-details">
+      ${s.peso_kg ? `<div class="detail-row"><svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span class="detail-key">Peso / envío</span><span class="detail-val">${s.peso_kg} kg · envío ${s.costo_envio_uyu ? '$'+fmtNum(s.costo_envio_uyu)+' UYU' : '—'}</span></div>` : ''}
+      ${s.notas ? `<div class="detail-row"><svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="detail-key">Notas</span><span class="detail-val">${esc(s.notas)}</span></div>` : ''}
+    </div>
+    <div class="card-actions">
+      <button class="btn-edit" onclick="abrirEditar(${s.id})">✏️ Editar</button>
+      <button class="btn-del" onclick="eliminar(${s.id})">Eliminar</button>
+    </div>
+  </div>`;
+}
+
+// ── KPIs ─────────────────────────────────────────────────────────
+function updateKPIs() {
+  const total = allItems.length;
+  document.getElementById('kpiTotal').textContent = total;
+
+  const paises = [...new Set(allItems.map(i => (i.bandera || '🌍') + ' ' + i.pais_origen))];
+  document.getElementById('kpiPaises').textContent = paises.length;
+  document.getElementById('kpiPaisesSub').textContent = paises.slice(0,3).join(' · ') + (paises.length > 3 ? '…' : '');
+
+  const withMargen = allItems.filter(i => i.margen_pct !== null);
+  if (withMargen.length) {
+    const avg = withMargen.reduce((a, b) => a + b.margen_pct, 0) / withMargen.length;
+    document.getElementById('kpiMargen').textContent = avg.toFixed(1) + '%';
+    const best = withMargen.reduce((a, b) => a.margen_pct > b.margen_pct ? a : b);
+    document.getElementById('kpiBest').textContent = best.producto.length > 22 ? best.producto.slice(0,22)+'…' : best.producto;
+    document.getElementById('kpiBestSub').textContent = best.margen_pct.toFixed(1) + '% margen bruto';
+  } else {
+    document.getElementById('kpiMargen').textContent = '—';
+  }
+  document.getElementById('kpiSub').textContent = total === 1 ? '1 entrada' : total + ' entradas';
+}
+
+// ── Country filter chips ──────────────────────────────────────────
+function buildCountryFilters() {
+  const paises = [...new Set(allItems.map(i => i.pais_origen))].sort();
+  const bar = document.getElementById('countryFilters');
+  if (paises.length <= 1) { bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  bar.innerHTML = paises.map(p => {
+    const item = allItems.find(i => i.pais_origen === p);
+    const flag = item?.bandera || '🌍';
+    return `<span class="filter-chip" data-filter="pais:${p}" onclick="setFilter(this)">${flag} ${p}</span>`;
+  }).join('');
+}
+
+// ── Filter logic ─────────────────────────────────────────────────
+document.querySelectorAll('.filter-chip').forEach(c => c.addEventListener('click', () => setFilter(c)));
+function setFilter(chip) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  activeFilter = chip.dataset.filter;
+  renderAll();
+}
+
+// ── Modal ─────────────────────────────────────────────────────────
+function abrirModal() {
+  editingId = null;
+  document.getElementById('modalTitleText').textContent = 'Nuevo producto';
+  resetForm();
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('f_producto').focus();
+}
+
+function abrirEditar(id) {
+  const s = allItems.find(i => i.id === id);
+  if (!s) return;
+  editingId = id;
+  document.getElementById('modalTitleText').textContent = 'Editar producto';
+  document.getElementById('f_producto').value      = s.producto || '';
+  document.getElementById('f_marca').value         = s.marca || '';
+  document.getElementById('f_presentacion').value  = s.presentacion || '';
+  document.getElementById('f_categoria').value     = s.categoria || '';
+  document.getElementById('f_moneda').value        = s.moneda || 'USD';
+  document.getElementById('f_tc').value            = s.tipo_cambio_uyu || '';
+  document.getElementById('f_precio_origen').value = s.precio_origen || '';
+  document.getElementById('f_fuente').value        = s.fuente || '';
+  document.getElementById('f_peso').value          = s.peso_kg || '';
+  document.getElementById('f_envio').value         = s.costo_envio_uyu || '';
+  document.getElementById('f_mercado').value       = s.precio_mercado_uy || '';
+  document.getElementById('f_pvp').value           = s.precio_venta_sugerido || '';
+  document.getElementById('f_notas').value         = s.notas || '';
+  // Set country select
+  const sel = document.getElementById('f_pais');
+  for (let opt of sel.options) { if (opt.value === s.pais_origen) { sel.value = s.pais_origen; break; } }
+  updateMonedaLabel();
+  recalcPreview();
+  document.getElementById('modal').classList.add('open');
+}
+
+function cerrarModal() {
+  document.getElementById('modal').classList.remove('open');
+  editingId = null;
+}
+
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal')) cerrarModal();
+});
+
+function resetForm() {
+  ['f_producto','f_marca','f_presentacion','f_moneda','f_tc','f_precio_origen',
+   'f_fuente','f_peso','f_envio','f_mercado','f_pvp','f_notas'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('f_categoria').value = '';
+  document.getElementById('f_pais').value = '';
+  document.getElementById('monedaLabel').textContent = '(moneda)';
+  ['prev_costo_origen','prev_costo_total','prev_margen'].forEach(id => {
+    document.getElementById(id).textContent = '—';
+  });
+  document.getElementById('prev_margen').style.color = 'var(--text)';
+}
+
+// ── País change: auto-fill moneda y TC ───────────────────────────
+function onPaisChange() {
+  const sel  = document.getElementById('f_pais');
+  const opt  = sel.options[sel.selectedIndex];
+  if (opt && opt.dataset.moneda) {
+    document.getElementById('f_moneda').value = opt.dataset.moneda;
+    if (!document.getElementById('f_tc').value)
+      document.getElementById('f_tc').value = opt.dataset.tc;
+  }
+  updateMonedaLabel();
+  recalcPreview();
+}
+
+function updateMonedaLabel() {
+  const m = document.getElementById('f_moneda').value;
+  document.getElementById('monedaLabel').textContent = m ? `(${m})` : '(moneda)';
+}
+document.getElementById('f_moneda').addEventListener('input', () => { updateMonedaLabel(); recalcPreview(); });
+
+// ── Live preview ─────────────────────────────────────────────────
+function recalcPreview() {
+  const origen  = parseFloat(document.getElementById('f_precio_origen').value) || 0;
+  const tc      = parseFloat(document.getElementById('f_tc').value) || 0;
+  const envio   = parseFloat(document.getElementById('f_envio').value) || 0;
+  const pvp     = parseFloat(document.getElementById('f_pvp').value) || 0;
+  const costoOrigen = origen * tc;
+  const costoTotal  = costoOrigen + envio;
+  const margen      = pvp > 0 ? ((pvp - costoTotal) / pvp * 100) : null;
+
+  document.getElementById('prev_costo_origen').textContent = costoOrigen > 0 ? '$' + fmtNum(costoOrigen) + ' UYU' : '—';
+  document.getElementById('prev_costo_total').textContent  = costoTotal  > 0 ? '$' + fmtNum(costoTotal)  + ' UYU' : '—';
+  const mEl = document.getElementById('prev_margen');
+  if (margen !== null) {
+    mEl.textContent = margen.toFixed(1) + '%';
+    mEl.style.color = margen >= 50 ? 'var(--success)' : margen >= 30 ? 'var(--warn)' : 'var(--danger)';
+  } else {
+    mEl.textContent = '—';
+    mEl.style.color = 'var(--text)';
+  }
+}
+
+// ── Save ─────────────────────────────────────────────────────────
+async function guardar() {
+  const producto = document.getElementById('f_producto').value.trim();
+  const pais     = document.getElementById('f_pais').value;
+  if (!producto || !pais) {
+    if (!producto) document.getElementById('f_producto').style.borderColor = 'var(--danger)';
+    if (!pais)     document.getElementById('f_pais').style.borderColor     = 'var(--danger)';
+    return;
+  }
+  document.getElementById('f_producto').style.borderColor = '';
+  document.getElementById('f_pais').style.borderColor     = '';
+
+  const sel    = document.getElementById('f_pais');
+  const opt    = sel.options[sel.selectedIndex];
+  const bandera = opt?.dataset?.bandera || '🌍';
+
+  const body = {
+    producto,
+    marca:                 document.getElementById('f_marca').value.trim() || null,
+    presentacion:          document.getElementById('f_presentacion').value.trim() || null,
+    categoria:             document.getElementById('f_categoria').value || null,
+    pais_origen:           pais,
+    bandera,
+    moneda:                document.getElementById('f_moneda').value.trim() || 'USD',
+    precio_origen:         parseFloat(document.getElementById('f_precio_origen').value) || null,
+    tipo_cambio_uyu:       parseFloat(document.getElementById('f_tc').value) || null,
+    peso_kg:               parseFloat(document.getElementById('f_peso').value) || null,
+    fuente:                document.getElementById('f_fuente').value.trim() || null,
+    costo_envio_uyu:       parseFloat(document.getElementById('f_envio').value) || 0,
+    precio_mercado_uy:     parseFloat(document.getElementById('f_mercado').value) || null,
+    precio_venta_sugerido: parseFloat(document.getElementById('f_pvp').value) || null,
+    notas:                 document.getElementById('f_notas').value.trim() || null,
+  };
+
+  const btn = document.getElementById('btnGuardar');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  try {
+    const url    = editingId ? `${BACKEND}/api/sourcing/${editingId}` : `${BACKEND}/api/sourcing`;
+    const method = editingId ? 'PATCH' : 'POST';
+    const res    = await fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    if (!res.ok) throw new Error(await res.text());
+    cerrarModal();
+    await loadItems();
+  } catch(e) {
+    alert('Error al guardar: ' + e.message);
+  }
+  btn.disabled = false; btn.textContent = 'Guardar';
+}
+
+// ── Delete ────────────────────────────────────────────────────────
+async function eliminar(id) {
+  const item = allItems.find(i => i.id === id);
+  if (!confirm(`¿Eliminar "${item?.producto}"?`)) return;
+  try {
+    await fetch(`${BACKEND}/api/sourcing/${id}`, { method: 'DELETE' });
+    await loadItems();
+  } catch(e) { alert('Error al eliminar'); }
+}
+
+// ── Utils ─────────────────────────────────────────────────────────
+function fmtNum(n, dec = 0) {
+  return Number(n).toLocaleString('es-UY', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+}
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Init ──────────────────────────────────────────────────────────
+loadItems();
+</script>
+</body>
+</html>

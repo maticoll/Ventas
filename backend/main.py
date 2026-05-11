@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 
 from database import (
     init_db, get_db,
-    Product, ProductSearch, Campaign, CampaignMetrics, BusinessNote
+    Product, ProductSearch, Campaign, CampaignMetrics, BusinessNote, SourcingItem
 )
 
 load_dotenv()
@@ -113,6 +113,42 @@ class BusinessNoteCreate(BaseModel):
     conclusion: Optional[str] = None
     contexto: Optional[dict] = None
     tags: Optional[str] = None
+
+
+class SourcingItemCreate(BaseModel):
+    producto: str
+    marca: Optional[str] = None
+    presentacion: Optional[str] = None
+    categoria: Optional[str] = None
+    pais_origen: str
+    bandera: Optional[str] = None
+    moneda: Optional[str] = "USD"
+    precio_origen: Optional[float] = None
+    tipo_cambio_uyu: Optional[float] = None
+    peso_kg: Optional[float] = None
+    fuente: Optional[str] = None
+    costo_envio_uyu: Optional[float] = 0
+    precio_mercado_uy: Optional[float] = None
+    precio_venta_sugerido: Optional[float] = None
+    notas: Optional[str] = None
+
+
+class SourcingItemUpdate(BaseModel):
+    producto: Optional[str] = None
+    marca: Optional[str] = None
+    presentacion: Optional[str] = None
+    categoria: Optional[str] = None
+    pais_origen: Optional[str] = None
+    bandera: Optional[str] = None
+    moneda: Optional[str] = None
+    precio_origen: Optional[float] = None
+    tipo_cambio_uyu: Optional[float] = None
+    peso_kg: Optional[float] = None
+    fuente: Optional[str] = None
+    costo_envio_uyu: Optional[float] = None
+    precio_mercado_uy: Optional[float] = None
+    precio_venta_sugerido: Optional[float] = None
+    notas: Optional[str] = None
 
 
 # ── System prompt ─────────────────────────────────────────────────────────────
@@ -620,3 +656,93 @@ def _note_to_dict(n):
         "contexto": n.contexto, "tags": n.tags,
         "created_at": n.created_at.isoformat() if n.created_at else None,
     }
+
+def _sourcing_to_dict(s):
+    costo_origen_uyu = (s.precio_origen or 0) * (s.tipo_cambio_uyu or 1)
+    costo_total_uyu  = costo_origen_uyu + (s.costo_envio_uyu or 0)
+    pvp = s.precio_venta_sugerido or 0
+    margen_pct = round((pvp - costo_total_uyu) / pvp * 100, 1) if pvp > 0 else None
+    return {
+        "id": s.id,
+        "producto": s.producto,
+        "marca": s.marca,
+        "presentacion": s.presentacion,
+        "categoria": s.categoria,
+        "pais_origen": s.pais_origen,
+        "bandera": s.bandera,
+        "moneda": s.moneda,
+        "precio_origen": s.precio_origen,
+        "tipo_cambio_uyu": s.tipo_cambio_uyu,
+        "peso_kg": s.peso_kg,
+        "fuente": s.fuente,
+        "costo_envio_uyu": s.costo_envio_uyu,
+        "precio_mercado_uy": s.precio_mercado_uy,
+        "precio_venta_sugerido": s.precio_venta_sugerido,
+        "notas": s.notas,
+        # campos calculados
+        "costo_origen_uyu": round(costo_origen_uyu, 2),
+        "costo_total_uyu": round(costo_total_uyu, 2),
+        "margen_pct": margen_pct,
+        "created_at": s.created_at.isoformat() if s.created_at else None,
+        "updated_at": s.updated_at.isoformat() if s.updated_at else None,
+    }
+
+
+# ── Sourcing Lab ──────────────────────────────────────────────────────────────
+
+@app.get("/api/sourcing")
+def listar_sourcing(categoria: Optional[str] = None, pais: Optional[str] = None, db: Session = Depends(get_db)):
+    q = db.query(SourcingItem)
+    if categoria:
+        q = q.filter(SourcingItem.categoria == categoria)
+    if pais:
+        q = q.filter(SourcingItem.pais_origen == pais)
+    items = q.order_by(SourcingItem.producto.asc(), SourcingItem.pais_origen.asc()).all()
+    return [_sourcing_to_dict(s) for s in items]
+
+
+@app.post("/api/sourcing", status_code=201)
+def crear_sourcing(data: SourcingItemCreate, db: Session = Depends(get_db)):
+    s = SourcingItem(
+        producto=data.producto,
+        marca=data.marca,
+        presentacion=data.presentacion,
+        categoria=data.categoria,
+        pais_origen=data.pais_origen,
+        bandera=data.bandera,
+        moneda=data.moneda or "USD",
+        precio_origen=data.precio_origen,
+        tipo_cambio_uyu=data.tipo_cambio_uyu,
+        peso_kg=data.peso_kg,
+        fuente=data.fuente,
+        costo_envio_uyu=data.costo_envio_uyu or 0,
+        precio_mercado_uy=data.precio_mercado_uy,
+        precio_venta_sugerido=data.precio_venta_sugerido,
+        notas=data.notas,
+    )
+    db.add(s)
+    db.commit()
+    db.refresh(s)
+    return _sourcing_to_dict(s)
+
+
+@app.patch("/api/sourcing/{item_id}")
+def actualizar_sourcing(item_id: int, data: SourcingItemUpdate, db: Session = Depends(get_db)):
+    s = db.query(SourcingItem).filter(SourcingItem.id == item_id).first()
+    if not s:
+        raise HTTPException(status_code=404, detail="Ítem de sourcing no encontrado")
+    for field, value in data.model_dump(exclude_none=True).items():
+        setattr(s, field, value)
+    s.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(s)
+    return _sourcing_to_dict(s)
+
+
+@app.delete("/api/sourcing/{item_id}", status_code=204)
+def eliminar_sourcing(item_id: int, db: Session = Depends(get_db)):
+    s = db.query(SourcingItem).filter(SourcingItem.id == item_id).first()
+    if not s:
+        raise HTTPException(status_code=404, detail="Ítem de sourcing no encontrado")
+    db.delete(s)
+    db.commit()

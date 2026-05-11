@@ -151,6 +151,34 @@ class CampaignMetrics(Base):
     campaign        = relationship("Campaign", back_populates="metrics")
 
 
+class SourcingItem(Base):
+    """
+    Comparativo de proveedores por país para el Sourcing Lab.
+    Cada fila es un producto + origen (país proveedor).
+    """
+    __tablename__ = "sourcing_items"
+
+    id                    = Column(Integer, primary_key=True, index=True)
+    producto              = Column(String(200), nullable=False)   # nombre del producto
+    marca                 = Column(String(100))                    # marca
+    presentacion          = Column(String(100))                    # "50 ml", "300 ml", etc.
+    categoria             = Column(String(100))                    # serum | limpiador | hidratante | etc.
+    pais_origen           = Column(String(100), nullable=False)   # "Estados Unidos", "Brasil", etc.
+    bandera               = Column(String(10))                     # emoji de bandera: 🇺🇸 🇧🇷 etc.
+    moneda                = Column(String(10), default="USD")      # USD | BRL | ARS | EUR | etc.
+    precio_origen         = Column(Float)                          # precio en moneda de origen
+    tipo_cambio_uyu       = Column(Float)                          # tipo de cambio a UYU
+    peso_kg               = Column(Float)                          # peso estimado en kg
+    fuente                = Column(String(200))                    # proveedor / tienda
+    costo_envio_uyu       = Column(Float, default=0)               # costo de envío en UYU
+    precio_mercado_uy     = Column(Float)                          # precio referencia en Uruguay (UYU)
+    precio_venta_sugerido = Column(Float)                          # precio de venta sugerido (UYU)
+    notas                 = Column(Text)
+
+    created_at  = Column(DateTime, default=datetime.utcnow)
+    updated_at  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 class BusinessNote(Base):
     """
     Decisiones y notas del negocio — el registro de todo lo que van
