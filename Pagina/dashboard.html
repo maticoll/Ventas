@@ -1205,12 +1205,21 @@
               <h3>Costos</h3>
 
               <div class="input-group">
-                <label>Precio de compra (proveedor)</label>
+                <label>Precio de compra por unidad (proveedor)</label>
                 <div class="input-wrap">
                   <div class="input-prefix">USD</div>
                   <input type="number" id="c_compra" placeholder="0.00" step="0.01" min="0" />
                 </div>
-                <div class="input-hint">Precio en AliExpress u otro proveedor</div>
+                <div class="input-hint">Precio por producto en AliExpress u otro proveedor</div>
+              </div>
+
+              <div class="input-group">
+                <label>Cantidad de productos comprados</label>
+                <div class="input-wrap">
+                  <input type="number" id="c_cantidad_compra" placeholder="1" step="1" min="1" value="1" />
+                  <div class="input-suffix">unidades</div>
+                </div>
+                <div class="input-hint">El envío y otros costos se dividen entre esta cantidad</div>
               </div>
 
               <div class="input-group">
@@ -1595,7 +1604,7 @@ setInterval(checkBackend, 30000);
 // ════════════════════════════════════════════════════════════════
 //  CALCULADORA
 // ════════════════════════════════════════════════════════════════
-const INPUTS = ['c_compra','c_envio','c_otros','c_tc','c_comision','c_venta','c_cantidad'];
+const INPUTS = ['c_compra','c_cantidad_compra','c_envio','c_otros','c_tc','c_comision','c_venta','c_cantidad'];
 INPUTS.forEach(id => {
   document.getElementById(id).addEventListener('input', calcular);
 });
@@ -1612,20 +1621,22 @@ function fmt(n, dec = 0) {
 }
 
 function calcular() {
-  const compra   = getVal('c_compra');
-  const envio    = getVal('c_envio');
-  const otros    = getVal('c_otros');
-  const tc       = getVal('c_tc') || 43.5;
-  const comPct   = getVal('c_comision');
-  const venta    = getVal('c_venta');
-  const cantidad = Math.max(1, Math.round(getVal('c_cantidad') || 1));
+  const compra          = getVal('c_compra');
+  const cantidadCompra  = Math.max(1, Math.round(getVal('c_cantidad_compra') || 1));
+  const envio           = getVal('c_envio');
+  const otros           = getVal('c_otros');
+  const tc              = getVal('c_tc') || 43.5;
+  const comPct          = getVal('c_comision');
+  const venta           = getVal('c_venta');
+  const cantidad        = Math.max(1, Math.round(getVal('c_cantidad') || 1));
 
   if (compra === 0 && venta === 0) {
     resetDisplay();
     return;
   }
 
-  const costoUSD      = compra + envio + otros;
+  // Costo por unidad: precio compra + reparto de envío y otros entre unidades compradas
+  const costoUSD      = compra + (envio + otros) / cantidadCompra;
   const costoUYU      = costoUSD * tc;
   const comisionUYU   = venta * (comPct / 100);
   const gananciaUYU   = venta - costoUYU - comisionUYU;
@@ -1685,12 +1696,13 @@ function calcular() {
 
   // Desglose
   const rows = [
-    ['Precio de compra',      `${fmt(compra, 2)} USD`,                               ''],
-    ['Costo de envío',        `${fmt(envio, 2)} USD`,                                ''],
-    ['Otros costos',          `${fmt(otros, 2)} USD`,                                ''],
-    ['─',                     '',                                                     ''],
-    ['Costo total (USD)',      `${fmt(costoUSD, 2)} USD`,                             'var(--text-dim)'],
-    ['Costo total (UYU)',      `$ ${fmt(costoUYU)}`,                                  'var(--text-dim)'],
+    ['Precio compra (por unidad)', `${fmt(compra, 2)} USD`,                          ''],
+    ['Unidades compradas',         `${cantidadCompra} u.`,                            'var(--text-dim)'],
+    ['Envío (prorrateado/u.)',      `${fmt(envio / cantidadCompra, 2)} USD`,          ''],
+    ['Otros costos (prorrateado/u.)', `${fmt(otros / cantidadCompra, 2)} USD`,       ''],
+    ['─',                          '',                                                ''],
+    ['Costo por unidad (USD)',      `${fmt(costoUSD, 2)} USD`,                        'var(--text-dim)'],
+    ['Costo por unidad (UYU)',      `$ ${fmt(costoUYU)}`,                             'var(--text-dim)'],
     ['Precio de venta',       `$ ${fmt(venta)}`,                                      ''],
     ['Comisión plataforma',   `−$ ${fmt(comisionUYU)} (${comPct}%)`,                 'var(--danger)'],
     ['─',                     '',                                                     ''],
@@ -1736,6 +1748,7 @@ function resetCalc() {
   ['c_compra','c_envio','c_otros','c_comision','c_venta'].forEach(id => {
     document.getElementById(id).value = '';
   });
+  document.getElementById('c_cantidad_compra').value = '1';
   document.getElementById('c_tc').value = '43.5';
   document.getElementById('c_cantidad').value = '1';
   resetDisplay();
